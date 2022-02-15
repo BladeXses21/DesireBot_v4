@@ -14,7 +14,7 @@ class ClanSystem(DatabaseSystem):
 
         self.clan_collection.insert_one({
             'leader_id': leader_id,
-            'role_id': role_id,
+            'clan_role_id': role_id,
             'clan_name': clan_name,
             'voice_id': voice_id,
             'text_id': text_id,
@@ -26,31 +26,19 @@ class ClanSystem(DatabaseSystem):
         })
 
         self.clan_member_collection.insert_one({
-            'leader_id': leader_id,
-            'role_id': role_id,
-            'clan_member': [
-                {
-                    'member_id': None,
-                    'member_online': 0,
-                    'invite_time': None
-                }
-            ]
+            'clan_role_id': role_id,
+            'member_id': leader_id,
         })
 
-        self.clan_member_collection.update_one({
-            'leader_id': leader_id
-        },
-            {'$set': {'clan_member': {'member_id': leader_id, 'invite_time': create_time}}}
-        )
+    def clan_invite(self, clan_role_id: int, member_id: int):
+        new_clan_member = {"clan_role_id": clan_role_id, "member_id": member_id}
+        self.clan_member_collection.insert_one(new_clan_member)
         return True
 
-    def invite_clan(self, leader_id: int, member_id: int, invite_time: int):
-        self.clan_member_collection.update_one({
-            'leader_id': leader_id
-        },
-            {'$push': {'clan_member': {'member_id': member_id, 'invite_time': invite_time}}}
-        )
-        return True
+    def find_clan_member(self, member_id: int):
+        if self.clan_member_collection.find_one({'member_id': member_id}):
+            return member_id
+        return False
 
     def delete_clan(self, leader_id: int) -> tuple:
         res = self.clan_collection.find_one({'leader_id': leader_id})
@@ -59,8 +47,11 @@ class ClanSystem(DatabaseSystem):
             return ()
 
         self.clan_collection.delete_one({'leader_id': leader_id})
-        self.clan_member_collection.delete_one({'leader_id': leader_id})
-        return res['role_id'], res['voice_id'], res['text_id']
+        self.clan_member_collection.delete_many({'clan_role_id': res['clan_role_id']})
+        return res['clan_role_id'], res['voice_id'], res['text_id']
+
+    def get_clan_info(self, leader_id: int):
+        return self.clan_collection.find_one({'leader_id': leader_id}, projection={'_id': False})
 
 
 clan_system = ClanSystem()

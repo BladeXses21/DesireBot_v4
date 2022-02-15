@@ -1,10 +1,11 @@
 import time
+
 import discord
 from discord import Colour, Embed
-
 from discord.ext import commands
 from discord.utils import get
 from discord.commands import Option, slash_command
+from discord.ui import Button
 
 from cogs.base import BaseCog
 from config import GUILD_ID, ADMIN_ROLE, MODER_ROLE, CLANS, CLANS_ROLES, ClANS_GUILD_ID
@@ -54,7 +55,7 @@ class ClansCog(BaseCog):
         self.everyone_role = discord.utils.get(self.guild.roles, name="@everyone")
         self.create_time = int(time.time())
 
-    @slash_command()
+    @slash_command(name='clans', guild_ids=[ClANS_GUILD_ID])
     async def clans(self, ctx):
         await ctx.respond("Hi, this is a global slash command from a cog!")
 
@@ -74,12 +75,11 @@ class ClansCog(BaseCog):
 
         return await ctx.respond(embed=DefaultEmbed(f'***```{author}, Клан был удален```***'))
 
-    @slash_command(name='clan_create', description='Create clans')
+    @slash_command(name='clan_create', description='Create clans', guild_ids=[ClANS_GUILD_ID])
     async def clan_create(self, ctx, color: Option(str, 'Enter clan color', required=True),
                           name: Option(str, 'Enter clan role name', required=True)):
         author = ctx.author
         guild = ctx.guild
-
         clan_name = ''.join(name)
         try:
             r = int(color[0:2], 16)
@@ -123,6 +123,23 @@ class ClansCog(BaseCog):
                                 text_id=text_channel.id, create_time=self.create_time)
         await msg.edit(embed=DefaultEmbed(f'***```Клан {clan_name} был успешно создан.```***'))
 
+    @slash_command(name='clan_invite', description='To invite a clan', guild_ids=[ClANS_GUILD_ID])
+    @is_clan_leader()
+    async def clan_invite(self, ctx, member: Option(discord.Member, 'Enter member to invite', required=True)):
+        author = ctx.author
+
+        clan_info = clan_system.get_clan_info(leader_id=author.id)
+        clan_role = discord.utils.get(self.guild.roles, name=clan_info['clan_name'])
+        clan_member_id = clan_system.find_clan_member(member.id)
+        print(author.id, member.id, clan_member_id)
+        if member.id is author.id:
+            return await ctx.respond(f'***```Нельзя пригласить самого себя!```***')
+        if member.id == clan_member_id:
+            return await ctx.respond(f'***```Пользователь уже находиться в клане!```***')
+        clan_system.clan_invite(clan_role_id=clan_info['clan_role_id'], member_id=member.id)
+        await member.add_roles(clan_role)
+        return await ctx.respond(f'***```{member}, теперь участник вашего клане!```***')
+        # todo - сделать кнопки для ответа пользователя на вступление в клан
 
 def setup(client):
     client.add_cog(ClansCog(client))

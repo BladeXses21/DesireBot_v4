@@ -2,7 +2,7 @@ from discord.ext import commands
 
 from cogs.base import BaseCog
 from config import ClANS_GUILD_ID
-
+from systems.money_system import money_system
 
 
 class MoneyCog(BaseCog):
@@ -22,8 +22,8 @@ class MoneyCog(BaseCog):
         self.guild = self.client.get_guild(ClANS_GUILD_ID)
 
         for member in self.guild.members:
-            print(member)
-            # money_system.add_all_clan_members_into_collection(member_id=member.id)
+            money_system.add_all_clan_members_into_collection(member_id=member.id)
+
 
         # for self.guild in self.client.guilds:
         #     for member in self.guild.members:

@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pymongo = "*"
 py-cord = "==2.0.0b1"
+dnspython = "*"
 
 [dev-packages]
 

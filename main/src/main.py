@@ -16,7 +16,7 @@ async def on_ready():
     print("PIDOR READY")
 
 
-for filename in os.listdir("main/src/cogs"):
+for filename in os.listdir("cogs"):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 

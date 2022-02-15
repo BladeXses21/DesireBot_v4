@@ -3,10 +3,10 @@ Token = 'ODY2MDUwNzkzMzAwMDMzNTk2.YPM6pw.f9Nq9JwLJHBZis3MwFUH3TOBCjs'
 
 # MongoDb token
 # Dziantao DB
-MongoToken = 'mongodb+srv://admin:admin@cluster0.e9eia.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+# MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
 
 # BladeXses DB
-# MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
+MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
 
 # ID сервера
 GUILD_ID = 866061390313029662, 514860704541573120
