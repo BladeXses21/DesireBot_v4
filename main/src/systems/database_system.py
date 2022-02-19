@@ -20,5 +20,11 @@ class DatabaseSystem(object):
         return self.db.clan_members
 
     @property
+    def clan_member_details_collection(self):
+        return self.db.clan_member_details
+
+    @property
     def money_collection(self):
         return self.db.member_money
+
+
