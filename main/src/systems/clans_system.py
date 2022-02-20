@@ -13,7 +13,7 @@ class ClanSystem(DatabaseSystem):
             return True
         return False
 
-    def create_clan(self, leader_id: int, role_id: int, clan_name: str, voice_id: int, text_id: int, create_time: int):
+    def create_clan(self, leader_id: int, role_id: int, clan_name: str, voice_id: int, text_id: int, color, create_time: int):
 
         if self.clan_collection.find_one({'leader_id': leader_id}):
             return False
@@ -25,10 +25,13 @@ class ClanSystem(DatabaseSystem):
             'voice_id': voice_id,
             'text_id': text_id,
             'all_online': 0,
+            'clan_member_slot': 25,
             'zam_slot': 1,
             'start_member_slot': 25,
+            'clan_cash': 0,
             'img_url': None,
             'create_time': create_time,
+            'clan_color': color,
             'deleted_at': None
         })
 
@@ -42,7 +45,7 @@ class ClanSystem(DatabaseSystem):
             'clan_role_id': role_id,
             'member_id': leader_id,
             'member_online': 0,
-            'member_invite_time': None,
+            'member_invite_time': create_time,
             'member_afk': 0,
             'deleted_at': None
         })
@@ -74,6 +77,7 @@ class ClanSystem(DatabaseSystem):
         #                                                {'$set': {'deleted_at': int(time.time())}})
         self.clan_collection.delete_one({'leader_id': leader_id})
         self.clan_member_collection.delete_many({'clan_role_id': res['clan_role_id']})
+        self.clan_member_details_collection.delete_many({'clan_role_id': res["clan_role_id"]})
         return res['clan_role_id'], res['voice_id'], res['text_id']
 
     def get_clan_info(self, leader_id: int):
@@ -88,7 +92,7 @@ class ClanSystem(DatabaseSystem):
     def clan_profile(self, clan_role_id):
         return self.clan_member_details_collection.find({'clan_role_id': clan_role_id},
                                                         {'_id': 0, 'member_id': 1, 'member_online': 1}).sort(
-            'member_id', 1)
+            'member_online', -1)
 
 
 clan_system = ClanSystem()

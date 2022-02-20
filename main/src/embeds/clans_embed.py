@@ -2,10 +2,10 @@ from discord import Embed, Colour
 
 
 class DeleteEmbed(object):
-    def __init__(self, author, clan_name):
+    def __init__(self, author):
         self._embed = Embed(
             color=Colour(0xffffff),
-            description=f'{author}***```Клан {clan_name} был успешно удален.```***'
+            description=f'{author}***```Клан был успешно удален.```***'
         )
         self._embed.set_image(url='https://anime-chan.me/uploads/posts/2013-07/1372650141_aiura.gif')
 

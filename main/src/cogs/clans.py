@@ -74,7 +74,6 @@ class ClansCog(BaseCog):
     async def clan_delete(self, ctx):
         author = ctx.author
         guild = ctx.guild
-        clan_info = clan_system.get_clan_info(author.id)
 
         role_id, voice_id, text_id = clan_system.delete_clan(author.id)
         clan_role = guild.get_role(role_id)
@@ -84,7 +83,7 @@ class ClansCog(BaseCog):
         await guild.get_channel(voice_id).delete()
         await guild.get_channel(text_id).delete()
 
-        return await ctx.respond(embed=DeleteEmbed(author=author, clan_name=clan_info['clan_name']))
+        return await ctx.send(embed=DeleteEmbed(author=author)._embed)
 
     @slash_command(name='clan_create', description='Create clans', guild_ids=[ClANS_GUILD_ID])
     async def clan_create(self, ctx, color: Option(str, 'Enter clan color', required=True),
@@ -131,7 +130,7 @@ class ClansCog(BaseCog):
         print(clan_name, author, role.name, text_channel.id, voice_channel.id, self.create_time)
 
         clan_system.create_clan(leader_id=author.id, clan_name=clan_name, role_id=role.id, voice_id=voice_channel.id,
-                                text_id=text_channel.id, create_time=self.create_time)
+                                text_id=text_channel.id, color=color, create_time=self.create_time)
         await msg.edit(embed=DefaultEmbed(f'***```Клан {clan_name} был успешно создан.```***'))
 
     @slash_command(name='clan_invite', description='To invite a clan', guild_ids=[ClANS_GUILD_ID])
@@ -189,10 +188,10 @@ class ClansCog(BaseCog):
 
             counter += 1
 
-        embed = Embed(title=f'Профиль клана {get_clan_name["clan_name"]}', description=description)
-        embed.add_field(name=f'Всего времени', value=f'{get_clan_name["all_online"]}')
+        embed = Embed(title=f'Профиль клана {get_clan_name["clan_name"]}')
+        embed.add_field(name=f'Суммарный онлайн', value=f'{get_clan_name["all_online"]}')
         embed.add_field(name=f'Голосовой канал', value=f'<#{get_clan_name["voice_id"]}>')
-        embed.add_field(name=f'Дата создания', value=f'<t:{get_clan_name["create_time"]}>', inline=False)
+        embed.add_field(name=f'Дата создания', value=f'<t:{get_clan_name["create_time"]}:R>', inline=False)
 
         await ctx.respond(embed=embed)
 
