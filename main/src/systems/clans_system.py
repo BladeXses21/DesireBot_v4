@@ -1,5 +1,6 @@
 from systems.database_system import DatabaseSystem
 import time
+from config import CLANS
 
 
 class ClanSystem(DatabaseSystem):
@@ -13,7 +14,8 @@ class ClanSystem(DatabaseSystem):
             return True
         return False
 
-    def create_clan(self, leader_id: int, role_id: int, clan_name: str, voice_id: int, text_id: int, color, create_time: int):
+    def create_clan(self, leader_id: int, role_id: int, clan_name: str, voice_id: int, text_id: int, color,
+                    create_time: int):
 
         if self.clan_collection.find_one({'leader_id': leader_id}):
             return False
@@ -25,9 +27,8 @@ class ClanSystem(DatabaseSystem):
             'voice_id': voice_id,
             'text_id': text_id,
             'all_online': 0,
-            'clan_member_slot': 25,
+            'clan_member_slot': CLANS['CLAN_START_MEMBER_SLOT'],
             'zam_slot': 1,
-            'start_member_slot': 25,
             'clan_cash': 0,
             'img_url': None,
             'create_time': create_time,
@@ -55,6 +56,7 @@ class ClanSystem(DatabaseSystem):
         new_clan_member = {"clan_role_id": clan_role_id, "member_id": member_id}
         member_details = {'clan_role_id': clan_role_id, "member_id": member_id, 'member_online': 0,
                           'member_invite_time': invite_time, 'member_afk': 0, 'delete_at': None}
+        self.clan_collection.update_one({'clan_role_id': clan_role_id}, {'$set': {''}})
         self.clan_member_collection.insert_one(new_clan_member)
         self.clan_member_details_collection.insert_one(member_details)
         return True
@@ -93,6 +95,10 @@ class ClanSystem(DatabaseSystem):
         return self.clan_member_details_collection.find({'clan_role_id': clan_role_id},
                                                         {'_id': 0, 'member_id': 1, 'member_online': 1}).sort(
             'member_online', -1)
+
+    def set_flag(self, leader_id, image_url):
+        self.clan_collection.update_one({'leader_id': leader_id}, {'$set': {'img_url': image_url}})
+        return True
 
 
 clan_system = ClanSystem()

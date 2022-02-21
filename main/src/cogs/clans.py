@@ -1,4 +1,5 @@
 import time
+import urllib.request
 
 import discord
 from discord import Colour, Embed
@@ -148,6 +149,8 @@ class ClansCog(BaseCog):
         view.add_item(button1)
         view.add_item(button2)
 
+        if member.bot:
+            return await ctx.respond(embed=DefaultEmbed(f'***```Нельзя пригласить бота!```***'))
         if member.id is author.id:
             return await ctx.respond(embed=DefaultEmbed(f'***```Нельзя пригласить самого себя!```***'))
         if member.id == clan_member_id:
@@ -177,7 +180,7 @@ class ClansCog(BaseCog):
         author = ctx.author
         get_clan_role = clan_system.get_clan_role_by_member_id(author.id)
         member_info = clan_system.clan_profile(get_clan_role['clan_role_id'])
-        get_clan_name = clan_system.get_clan_info_by_role_id(get_clan_role['clan_role_id'])
+        get_clan_info_by_role = clan_system.get_clan_info_by_role_id(get_clan_role['clan_role_id'])
         description = '**Участники кланов:**\n'
         counter = 1
 
@@ -188,12 +191,32 @@ class ClansCog(BaseCog):
 
             counter += 1
 
-        embed = Embed(title=f'Профиль клана {get_clan_name["clan_name"]}')
-        embed.add_field(name=f'Суммарный онлайн', value=f'{get_clan_name["all_online"]}')
-        embed.add_field(name=f'Голосовой канал', value=f'<#{get_clan_name["voice_id"]}>')
-        embed.add_field(name=f'Дата создания', value=f'<t:{get_clan_name["create_time"]}:R>', inline=False)
+        embed = Embed(title=f'Профиль клана {get_clan_info_by_role["clan_name"]}')
+        embed.add_field(name=f'Суммарный онлайн', value=f'{get_clan_info_by_role["all_online"]}')
+        embed.add_field(name=f'Голосовой канал', value=f'<#{get_clan_info_by_role["voice_id"]}>')
+        embed.add_field(name=f'Дата создания', value=f'<t:{get_clan_info_by_role["create_time"]}:R>', inline=False)
+
+        if get_clan_info_by_role['img_url']:
+            embed.set_image(url=get_clan_info_by_role['img_url'])
 
         await ctx.respond(embed=embed)
+
+    @slash_command(name='clan_flag', description='Set clan flag', guild_ids=[ClANS_GUILD_ID])
+    @is_clan_leader()
+    async def clan_flag(self, ctx, image_url):
+
+        if image_url == 'None':
+            clan_system.set_flag(leader_id=ctx.author.id, image_url=None)
+            return await ctx.respond(embed=DefaultEmbed('Аватарка клана сброшена'))
+
+        try:
+            urllib.request.urlopen(image_url)
+        except:
+            return await ctx.respond(embed=DefaultEmbed(f'Плохая ссылка!'))
+
+        clan_system.set_flag(leader_id=ctx.author.id, image_url=image_url)
+
+        return await ctx.respond(embed=DefaultEmbed('Аватарка клана обновлена'))
 
 
 def setup(client):

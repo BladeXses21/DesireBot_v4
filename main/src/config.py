@@ -28,7 +28,8 @@ CLANS = {
     'CHANGE_NAME_COST': 5000,
     'CHANGE_COLOR_COST': 3000,
     'CLAN_5_SLOTS_COST': 1500,
-    'CLAN_CONSLIGER_COST': 3000
+    'CLAN_CONSLIGER_COST': 3000,
+    'CLAN_START_MEMBER_SLOT': 25
 }
 
 CLANS_ROLES = {
@@ -38,7 +39,6 @@ CLANS_ROLES = {
     'LEADER_ROLE_NAME': 'clan leader',
     'CONSLIGER_ROLE_NAME': 'clan consliger',
     'CLAN_CONTROL_ROLE_NAME': 'clan control'
-
 }
 
 TIMELY = 20
