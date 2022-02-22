@@ -5,7 +5,7 @@ import discord
 from discord import Colour, Embed
 from discord.ext import commands
 from discord.utils import get
-from discord.commands import Option, slash_command
+from discord.commands import Option, slash_command, SlashCommandGroup
 from discord.ui import Button
 
 from cogs.base import BaseCog
@@ -13,6 +13,7 @@ from config import GUILD_ID, ADMIN_ROLE, MODER_ROLE, CLANS, CLANS_ROLES, ClANS_G
 from embeds.def_embed import DefaultEmbed
 from embeds.clans_embed import DeleteEmbed
 from systems.clans_system import clan_system
+from systems.money_system import money_system
 
 
 def is_clan_leader():
@@ -67,7 +68,7 @@ class ClansCog(BaseCog):
         self.create_time = int(time.time())
 
     @slash_command(name='clans', guild_ids=[ClANS_GUILD_ID])
-    async def clans(self, ctx):
+    async def hello(self, ctx):
         await ctx.respond("Hi, this is a global slash command from a cog!")
 
     @slash_command(name='clan_delete', description='delete your clan')
@@ -76,7 +77,7 @@ class ClansCog(BaseCog):
         author = ctx.author
         guild = ctx.guild
 
-        role_id, voice_id, text_id = clan_system.delete_clan(author.id)
+        role_id, voice_id, text_id, clan_name = clan_system.delete_clan(author.id)
         clan_role = guild.get_role(role_id)
 
         await author.remove_roles(self.leader_role)
@@ -84,13 +85,16 @@ class ClansCog(BaseCog):
         await guild.get_channel(voice_id).delete()
         await guild.get_channel(text_id).delete()
 
-        return await ctx.send(embed=DeleteEmbed(author=author)._embed)
+        return await ctx.respond(embed=DeleteEmbed(clan_name=clan_name)._embed)
 
     @slash_command(name='clan_create', description='Create clans', guild_ids=[ClANS_GUILD_ID])
     async def clan_create(self, ctx, color: Option(str, 'Enter clan color', required=True),
                           name: Option(str, 'Enter clan role name', required=True)):
         author = ctx.author
         guild = ctx.guild
+
+        if clan_system.find_clan_member(member_id=author.id):
+            return await ctx.respond(embed=DefaultEmbed(f'***```У тебя уже есть клан.```***'))
         clan_name = ''.join(name)
         try:
             r = int(color[0:2], 16)
@@ -194,6 +198,7 @@ class ClansCog(BaseCog):
         embed = Embed(title=f'Профиль клана {get_clan_info_by_role["clan_name"]}')
         embed.add_field(name=f'Суммарный онлайн', value=f'{get_clan_info_by_role["all_online"]}')
         embed.add_field(name=f'Голосовой канал', value=f'<#{get_clan_info_by_role["voice_id"]}>')
+        embed.add_field(name=f'Казна клана', value=f'{get_clan_info_by_role["clan_cash"]}', inline=False)
         embed.add_field(name=f'Дата создания', value=f'<t:{get_clan_info_by_role["create_time"]}:R>', inline=False)
 
         if get_clan_info_by_role['img_url']:
@@ -217,6 +222,32 @@ class ClansCog(BaseCog):
         clan_system.set_flag(leader_id=ctx.author.id, image_url=image_url)
 
         return await ctx.respond(embed=DefaultEmbed('Аватарка клана обновлена'))
+
+    @slash_command(name='clan_deposit', description='deposit money to your clan', guild_ids=[ClANS_GUILD_ID])
+    @is_clan_user()
+    async def clan_deposit(self, ctx, amount: Option(int, 'Enter amount to dep', required=True)):
+        author = ctx.author
+        get_clan_role = clan_system.get_clan_role_by_member_id(author.id)
+        member_money = money_system.check_member_cash(author_id=author.id)
+
+        if member_money < amount:
+            return await ctx.respond(embed=DefaultEmbed(f'***```{author.name}, у вас не достаточно монет```***'))
+
+        money_system.take_money_for_clan(author.id, int(amount))
+        clan_system.clan_deposit(clan_role_id=get_clan_role['clan_role_id'], amount=int(amount))
+        print(get_clan_role, member_money)
+        return await ctx.respond(embed=DefaultEmbed(f'***```{author.name}, вы закинули {amount} монет в клан!```***'))
+
+    @slash_command(name='clan_addzam', description='deposit money to your clan', guild_ids=[ClANS_GUILD_ID])
+    @is_clan_leader()
+    async def clan_addzam(self, ctx, member: Option(discord.Member, 'specify a member to be promoted', required=True)):
+        author = ctx.author
+
+        get_clan_zam_num = clan_system.get_clan_info(leader_id=author.id)
+
+        if get_clan_zam_num <= 0:
+            return await ctx.respond(embed=DefaultEmbed(f'Больше не осталось свободных слотов под заместителя'))
+        # todo - Доделать добавление заместителя
 
 
 def setup(client):

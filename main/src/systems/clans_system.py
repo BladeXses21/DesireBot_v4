@@ -50,13 +50,20 @@ class ClanSystem(DatabaseSystem):
             'member_afk': 0,
             'deleted_at': None
         })
+
+        self.clan_zam_collection.insert_one({
+            'clan_role_id': role_id,
+            'zam_member_id': [{
+                'member_id': None
+            }]
+        })
         return True
 
     def clan_invite(self, clan_role_id: int, member_id: int, invite_time: int):
         new_clan_member = {"clan_role_id": clan_role_id, "member_id": member_id}
         member_details = {'clan_role_id': clan_role_id, "member_id": member_id, 'member_online': 0,
                           'member_invite_time': invite_time, 'member_afk': 0, 'delete_at': None}
-        self.clan_collection.update_one({'clan_role_id': clan_role_id}, {'$set': {''}})
+        self.clan_collection.update_one({'clan_role_id': clan_role_id}, {'$inc': {'clan_member_slot': -1}})
         self.clan_member_collection.insert_one(new_clan_member)
         self.clan_member_details_collection.insert_one(member_details)
         return True
@@ -80,7 +87,7 @@ class ClanSystem(DatabaseSystem):
         self.clan_collection.delete_one({'leader_id': leader_id})
         self.clan_member_collection.delete_many({'clan_role_id': res['clan_role_id']})
         self.clan_member_details_collection.delete_many({'clan_role_id': res["clan_role_id"]})
-        return res['clan_role_id'], res['voice_id'], res['text_id']
+        return res['clan_role_id'], res['voice_id'], res['text_id'], res['clan_name']
 
     def get_clan_info(self, leader_id: int):
         return self.clan_collection.find_one({'leader_id': leader_id}, projection={'_id': False})
@@ -98,6 +105,14 @@ class ClanSystem(DatabaseSystem):
 
     def set_flag(self, leader_id, image_url):
         self.clan_collection.update_one({'leader_id': leader_id}, {'$set': {'img_url': image_url}})
+        return True
+
+    def clan_deposit(self, clan_role_id: int, amount: int):
+        self.clan_collection.update_one({'clan_role_id': clan_role_id}, {'$inc': {'clan_cash': amount}})
+        return True
+
+    def clan_add_zam(self, clan_role_id: int, member_id: int):
+        self.clan_zam_collection.update_one({'clan_role_id': clan_role_id}, {'$push': {'member_id': member_id}})
         return True
 
 

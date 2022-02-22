@@ -4,7 +4,10 @@ from systems.database_system import DatabaseSystem
 
 class MoneySystem(DatabaseSystem):
     def add_all_clan_members_into_collection(self, member_id: int):
-        item = {"member_id": member_id, "money": START_MONEY}
+        item = {
+            "member_id": member_id,
+            "money": START_MONEY
+        }
         if self.money_collection.find_one({'member_id': member_id}):
             pass
         else:
@@ -12,23 +15,33 @@ class MoneySystem(DatabaseSystem):
             print(item)
             return True
 
+    def check_member(self, member_id: int):
+        if self.money_collection.find_one({'member_id': member_id}):
+            return False
 
-def check_member(self, member_id: int):
-    if self.money_collection.find_one({'member_id': member_id}):
-        return False
+        self.member_join(member_id, START_MONEY)
+        return True
 
-    self.member_join(member_id, START_MONEY)
-    return True
+    def member_join(self, author_id: int, amount: int):
+        self.money_collection.insert_one({'member_id': author_id, 'member_cash': amount})
+        return True
 
+    def award(self, author_id: int, amount: int):
+        self.money_collection.update_one({'member_id': author_id, 'member_cash': amount})
+        return True
 
-def member_join(self, author_id: int, amount: int):
-    self.money_collection.insert_one({'member_id': author_id, 'member_cash': amount})
-    return True
+    def check_member_cash(self, author_id: int):
+        res = self.money_collection.find_one({'member_id': author_id})
 
+        if not res:
+            self.check_member(author_id)
+            return ()
 
-def award(self, author_id: int, amount: int):
-    self.money_collection.update_one({'member_id': author_id, 'member_cash': amount})
-    return True
+        return res['money']
+
+    def take_money_for_clan(self, author_id: int, amount: int):
+        self.money_collection.update_one({'member_id': author_id}, {'$inc': {'money': -amount}})
+        return True
 
 
 money_system = MoneySystem()
