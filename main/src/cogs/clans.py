@@ -1,12 +1,11 @@
 import time
-import asyncio
 import urllib.request
 
 import discord
 from discord import Colour, Embed
 from discord.ext import commands
 from discord.utils import get
-from discord.commands import Option, slash_command, SlashCommandGroup
+from discord.commands import Option, slash_command
 from discord.ui import Button
 
 from cogs.base import BaseCog
@@ -15,6 +14,7 @@ from embeds.def_embed import DefaultEmbed
 from embeds.clans_embed import DeleteEmbed, ZamEmbed
 from systems.clans_system import clan_system
 from systems.money_system import money_system
+from base_error import on_cmd_error
 
 
 def is_clan_leader():
@@ -68,25 +68,45 @@ class ClansCog(BaseCog):
         self.everyone_role = discord.utils.get(self.guild.roles, name="@everyone")
         self.create_time = int(time.time())
 
-    @slash_command(name='clans', guild_ids=[ClANS_GUILD_ID])
-    async def hello(self, ctx):
-        await ctx.respond("Hi, this is a global slash command from a cog!")
-
     @slash_command(name='clan_delete', description='delete your clan')
     @is_clan_leader()
     async def clan_delete(self, ctx):
         author = ctx.author
         guild = ctx.guild
 
-        role_id, voice_id, text_id, clan_name, img_url = clan_system.delete_clan(author.id)
-        clan_role = guild.get_role(role_id)
+        button_accept = Button(style=discord.ButtonStyle.green, label='Accept')
+        button_decline = Button(style=discord.ButtonStyle.red, label='Decline')
 
-        await author.remove_roles(self.leader_role)
-        await clan_role.delete()
-        await guild.get_channel(voice_id).delete()
-        await guild.get_channel(text_id).delete()
+        view = discord.ui.View()
+        view.add_item(button_accept)
+        view.add_item(button_decline)
 
-        return await ctx.respond(embed=DeleteEmbed(clan_name=clan_name, img_url=img_url).embed)
+        await ctx.respond(embed=DefaultEmbed(f'Нужно подтверждение удаление клана.'), view=view, ephemeral=True)
+
+        async def AcceptDelete(interaction: discord.Interaction):
+
+            if interaction.user != author:
+                await interaction.response.send_message(embed=DefaultEmbed('Hey! You can`t use that!'))
+                return False
+            else:
+                role_id, voice_id, text_id, clan_name, img_url = clan_system.delete_clan(author.id)
+                clan_role = guild.get_role(role_id)
+
+                await author.remove_roles(self.leader_role)
+                await clan_role.delete()
+                await guild.get_channel(voice_id).delete()
+                await guild.get_channel(text_id).delete()
+                return await interaction.response.send_message(embed=DeleteEmbed(clan_name=clan_name, img_url=img_url).embed)
+
+        async def DeclineDelete(interaction: discord.Interaction):
+            if interaction.user != author:
+                await interaction.response.send_message(embed=DefaultEmbed('Hey! You can`t use that!'))
+                return False
+            else:
+                return await interaction.response.send_message(embed=DefaultEmbed(f'Удаление клана не подтверждено'))
+
+        button_accept.callback = AcceptDelete
+        button_decline.callback = DeclineDelete
 
     @slash_command(name='clan_create', description='Create clans', guild_ids=[ClANS_GUILD_ID])
     async def clan_create(self, ctx, color: Option(str, 'Enter clan color', required=True),
@@ -108,10 +128,11 @@ class ClansCog(BaseCog):
             return await ctx.respond(embed=DefaultEmbed('***```Название должно содержать больше 2 символов.```***'))
         if get(author.roles, name=CLANS_ROLES['LEADER_ROLE_NAME'] or CLANS_ROLES['CONSLIGER_ROLE_NAME']):
             return await ctx.respond(
-                embed=DefaultEmbed(f'***```Чтобы создать клан, снимите роль {CLANS_ROLES["LEADER_ROLE_NAME"]} или '
-                                   f'{CLANS_ROLES["CONSLIGER_ROLE_NAME"]}.```***'))
-        # Проверка на необходимое количество конфет
-        # return await ctx.respond(embed=DefaultEmbed(f"У вас недостаточно монет для создания клана, нужно {CLANS['CLAN_CREATE_COST']}.```***"))
+                embed=DefaultEmbed(
+                    f'***```Чтобы создать клан, снимите роль {CLANS_ROLES["LEADER_ROLE_NAME"]} или 'f'{CLANS_ROLES["CONSLIGER_ROLE_NAME"]}.```***'))
+        # if money_system.check_member_cash(author_id=author.id) < CLANS["CLAN_CREATE_COST"]:
+        #     return await ctx.respond(embed=DefaultEmbed(
+        #         f"***```У вас недостаточно монет для создания клана, нужно {CLANS['CLAN_CREATE_COST']}.```***"))
 
         await ctx.guild.create_role(name=clan_name)
         clans_role = discord.utils.get(guild.roles, name=clan_name)
@@ -120,28 +141,26 @@ class ClansCog(BaseCog):
         await author.add_roles(role)
 
         text_channel = await guild.create_text_channel(clan_name, category=self.clans_text_category)
-        overwrite = discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True,
-                                                embed_links=True)
+        overwrite = discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, embed_links=True)
         await text_channel.set_permissions(author, overwrite=overwrite)
         await text_channel.set_permissions(clans_role, overwrite=overwrite)
 
         voice_channel = await guild.create_voice_channel(clan_name, category=self.clans_voice_category)
-        overwrites_voice = discord.PermissionOverwrite(view_channel=True, mute_members=False, move_members=False,
-                                                       speak=True, connect=True)
-        await voice_channel.set_permissions(author, move_members=True, mute_members=True, view_channel=True, speak=True,
-                                            connect=True, priority_speaker=True)
+        overwrites_voice = discord.PermissionOverwrite(view_channel=True, mute_members=False, move_members=False, speak=True, connect=True)
+        await voice_channel.set_permissions(author, move_members=True, mute_members=True, view_channel=True, speak=True, connect=True, priority_speaker=True)
         await voice_channel.set_permissions(clans_role, overwrite=overwrites_voice)
-        clan_system.create_clan(leader_id=author.id, clan_name=clan_name, role_id=role.id,
-                                voice_id=voice_channel.id,
-                                text_id=text_channel.id, color=color, create_time=self.create_time)
+        clan_system.create_clan(leader_id=author.id, clan_name=clan_name, role_id=role.id, voice_id=voice_channel.id, text_id=text_channel.id, color=color,
+                                create_time=self.create_time)
+        money_system.take_money_for_clan(author_id=author.id, amount=CLANS["CLAN_CREATE_COST"])
         return await ctx.respond(embed=DefaultEmbed(f'***```Клан {clan_name} был успешно создан.```***'))
 
     @slash_command(name='clan_invite', description='To invite a clan', guild_ids=[ClANS_GUILD_ID])
+    @commands.cooldown(1, 10, commands.BucketType.user)
     @is_clan_leader()
     async def clan_invite(self, ctx, member: Option(discord.Member, 'Enter member to invite', required=True)):
         author = ctx.author
 
-        clan_info = clan_system.get_clan_info(leader_id=author.id)
+        clan_info = clan_system.get_clan_info_by_leader_id(leader_id=author.id)
         clan_role = discord.utils.get(self.guild.roles, name=clan_info['clan_name'])
         clan_member_id = clan_system.find_clan_member(member.id)
         button1 = Button(style=discord.ButtonStyle.green, label='Accept')
@@ -158,31 +177,66 @@ class ClansCog(BaseCog):
         if member.id == clan_member_id:
             return await ctx.respond(embed=DefaultEmbed(f'***```Пользователь уже находиться в клане!```***'))
         await ctx.respond(embed=DefaultEmbed(f'***```Вы пригласили пользователя {member} в свой клан!```***'))
-        await member.send(embed=DefaultEmbed(f'***```Вы были приглашены в клан: {clan_info["clan_name"]}```***'),
-                          view=view)
+        await member.send(embed=DefaultEmbed(f'***```Вы были приглашены в клан: {clan_info["clan_name"]}```***'), view=view)
         if clan_info['clan_member_number'] >= clan_info['clan_member_slot']:
             return await ctx.respond(embed=DefaultEmbed('Вы достигли лимита пользователей, докупить слоты.'))
 
         async def AcceptCallback(interaction: discord.Interaction):
             await member.add_roles(clan_role)
-            clan_system.clan_invite(clan_role_id=clan_info['clan_role_id'], member_id=member.id,
-                                    invite_time=self.create_time)
-            await interaction.response.send_message(
-                embed=DefaultEmbed(f'***```Вы приняли приглашение в клан {clan_info["clan_name"]}!```***'))
+            clan_system.clan_invite(clan_role_id=clan_info['clan_role_id'], member_id=member.id, invite_time=self.create_time)
+            await interaction.response.send_message(embed=DefaultEmbed(f'***```Вы приняли приглашение в клан {clan_info["clan_name"]}!```***'))
             return await ctx.send(embed=DefaultEmbed(f'***```{member}, теперь участник вашего клане!```***'))
 
         async def DeclineCallback(interaction: discord.Interaction):
-            await interaction.response.send_message(
-                embed=DefaultEmbed(f'***```Вы отклонили приглашение в клан: {clan_info["clan_name"]}!```***'))
+            await interaction.response.send_message(embed=DefaultEmbed(f'***```Вы отклонили приглашение в клан: {clan_info["clan_name"]}!```***'))
             return await ctx.send(embed=DefaultEmbed(f'***```{member}, не принял приглашение в клан!```***'))
 
         button1.callback = AcceptCallback
         button2.callback = DeclineCallback
 
+    @slash_command(name='clan_kick', description='Use to kick member on your clan', guilds_ids=[ClANS_GUILD_ID])
+    @is_clan_leader()
+    async def clan_kick(self, ctx, member: Option(discord.Member, 'Enter member to invite', required=False)):
+        author = ctx.author
+        clan_member_id = clan_system.find_clan_member(member.id)
+        get_clan_info_by_leader = clan_system.get_clan_info_by_leader_id(leader_id=author.id)
+        get_clan_info_member = clan_system.get_clan_role_id_by_member_id(member_id=member.id)
+
+        if member.id is author.id:
+            return await ctx.respond(embed=DefaultEmbed(f'***```Нельзя пригласить самого себя!```***'))
+        if member.id != clan_member_id:
+            return await ctx.respond(embed=DefaultEmbed(f'***```Пользователь не находиться в клане!```***'))
+        if get_clan_info_by_leader['clan_role_id'] != get_clan_info_member['clan_role_id']:
+            return await ctx.respond(embed=DefaultEmbed(f'***```Пользователь не в вашем клане!```***'))
+
+        clan_name, clan_role_id = clan_system.clan_leave(member_id=member.id)
+        # todo - не работает кик заместителя из клана !!!
+        if clan_system.check_member_for_a_zam_by_member_id(member_id=member.id):
+            clan_system.remove_zam_member_from_clan(clan_role_id=get_clan_info_by_leader['clan_role_id'], member_id=author.id)
+
+        return await ctx.respond(embed=DefaultEmbed(f'***```Вы кикнули {member.name} из клана {clan_name}```***'))
+
+    @slash_command(name='clan_leave', description='Use to leave the clan', guilds_ids=[ClANS_GUILD_ID])
+    @is_clan_user()
+    async def clan_leave(self, ctx):
+        author = ctx.author
+
+        if clan_system.check_author_on_clan(member_id=author.id):
+            return await ctx.respond(embed=DefaultEmbed('***```Не-не-не, сначало удали клан!```***'))
+
+        if clan_system.check_member_for_a_zam_by_member_id(member_id=author.id):
+            clan_name, clan_role_id = clan_system.clan_leave(member_id=author.id)
+            clan_system.remove_zam_member_from_clan(clan_role_id=clan_role_id, member_id=author.id)
+            return await ctx.respond(embed=DefaultEmbed(f'***```Вы успешно покинули клан {clan_name}```***'))
+
+        clan_name, clan_role_id = clan_system.clan_leave(member_id=author.id)
+        return await ctx.respond(embed=DefaultEmbed(f'***```Вы успешно покинули клан {clan_name}```***'))
+
     @slash_command(name='clan_profile', description='See your clan profile', guilds_ids=[ClANS_GUILD_ID])
+    @is_clan_user()
     async def clan_profile(self, ctx):
         author = ctx.author
-        get_clan_role = clan_system.get_clan_role_by_member_id(author.id)
+        get_clan_role = clan_system.get_clan_role_id_by_member_id(author.id)
         member_info = clan_system.clan_profile(get_clan_role['clan_role_id'])
         get_clan_info_by_role = clan_system.get_clan_info_by_role_id(get_clan_role['clan_role_id'])
         description = '**Участники кланов:**\n'
@@ -227,7 +281,7 @@ class ClansCog(BaseCog):
     @is_clan_user()
     async def clan_deposit(self, ctx, amount: Option(int, 'Enter amount to dep', required=True)):
         author = ctx.author
-        get_clan_role = clan_system.get_clan_role_by_member_id(author.id)
+        get_clan_role = clan_system.get_clan_role_id_by_member_id(author.id)
         member_money = money_system.check_member_cash(author_id=author.id)
 
         if member_money < amount:
@@ -235,16 +289,15 @@ class ClansCog(BaseCog):
 
         money_system.take_money_for_clan(author.id, int(amount))
         clan_system.clan_deposit(clan_role_id=get_clan_role['clan_role_id'], amount=int(amount))
-        print(get_clan_role, member_money)
         return await ctx.respond(embed=DefaultEmbed(f'***```{author.name}, вы закинули {amount} монет в клан!```***'))
 
     @slash_command(name='clan_zam', description='deposit money to your clan', guild_ids=[ClANS_GUILD_ID])
     @is_clan_leader()
     async def clan_zam(self, ctx, member: Option(discord.Member, 'specify a member to be promoted', required=True)):
         author = ctx.author
-        get_clan_info = clan_system.get_clan_info(leader_id=author.id)
+        get_clan_info = clan_system.get_clan_info_by_leader_id(leader_id=author.id)
         zam_member_id = clan_system.find_clan_zam_by_clan_role_id(clan_role_id=get_clan_info["clan_role_id"])
-        get_member_info = clan_system.get_clan_role_by_member_id(member_id=member.id)
+        get_member_info = clan_system.get_clan_role_id_by_member_id(member_id=member.id)
 
         if member == author:
             return await ctx.respond(embed=DefaultEmbed('***```Нет, так не пойдет!```***'))
@@ -270,23 +323,24 @@ class ClansCog(BaseCog):
             return await ctx.respond(
                 embed=DefaultEmbed(f'***```{member.name}, пользователь не состоит в вашем клане!```***'))
         clan_system.add_zam_member_to_clan(clan_role_id=get_clan_info['clan_role_id'], member_id=member.id)
-        await ctx.respond(
-            embed=ZamEmbed(author=author.name, member=member.name, clan_name=get_clan_info['clan_name'],
-                           zum_num=get_clan_info['zam_slot']).embed)
+        await ctx.respond(embed=ZamEmbed(author=author.name, member=member.name, clan_name=get_clan_info['clan_name'], zum_num=get_clan_info['zam_slot']).embed)
 
     @slash_command(name='clan_zslot', description='buy a slot for a consliger', guild_ids=[ClANS_GUILD_ID])
     @is_clan_leader()
     async def clan_zslot(self, ctx, how: Option(int, "how many slots do you want to buy", required=True)):
         author = ctx.author
-        get_clan_info = clan_system.get_clan_info(leader_id=author.id)
+        get_clan_info = clan_system.get_clan_info_by_leader_id(leader_id=author.id)
 
         if how > 4:
             return await ctx.respond(embed=DefaultEmbed('***```Нельзя купить больше 4 слотов заместителя.```***'))
         if get_clan_info['zam_slot'] >= 5:
             return await ctx.respond(
                 embed=DefaultEmbed('***```Вы достигли максимального количества слотов для заместителя.```***'))
+        if get_clan_info['clan_cash'] < how * CLANS['CLAN_CONSLIGER_COST']:
+            return await ctx.respond(embed=DefaultEmbed('***```В казне не достаточно монет.```***'))
+
         clan_system.buy_slot_clan_zam(leader_id=author.id, how=how)
-        money_system.take_money_for_clan(author.id, amount=how * CLANS['CLAN_CONSLIGER_COST'])
+        clan_system.clan_pay(get_clan_info['clan_role_id'], amount=how * CLANS['CLAN_CONSLIGER_COST'])
         return await ctx.respond(
             embed=DefaultEmbed(f'***```{author.name}, вы приобрели {how} слотов для заместителя.```***'))
 
@@ -294,20 +348,20 @@ class ClansCog(BaseCog):
     @is_clan_leader()
     async def clan_slot(self, ctx, how: Option(int, "how many slots do you want to buy", required=True)):
         author = ctx.author
-        get_clan_info = clan_system.get_clan_info(leader_id=author.id)
+        get_clan_info = clan_system.get_clan_info_by_leader_id(leader_id=author.id)
 
-        if get_clan_info['clan_member_slot'] >= 150:
+        if get_clan_info['clan_member_slot'] >= CLANS['CLAN_MAX_MEMBER_SLOT']:
             return await ctx.respond(
                 embed=DefaultEmbed('***```Вы достигли максимального количества слотов в клане```***'))
         if how > 25:
             return await ctx.respond(embed=DefaultEmbed('***```Нельзя купить больше 25 слотов за раз.```***'))
         if how < 5:
             return await ctx.respond(embed=DefaultEmbed('***```Покупать слоты можно не менее 5 за раз.```***'))
-        if get_clan_info['clan_member_slot'] + how >= 151:
-            return await ctx.respond(
-                embed=DefaultEmbed(f'***```Число слотов которое вы пытаетесь купить, превышает допустимое```***'))
+        if get_clan_info['clan_member_slot'] + how >= CLANS['CLAN_MAX_MEMBER_SLOT'] + 1:
+            return await ctx.respond(embed=DefaultEmbed(f'***```Число слотов которое вы пытаетесь купить, превышает допустимое```***'))
+
+        clan_system.clan_pay(get_clan_info['clan_role_id'], amount=how / 5 * CLANS["CLAN_5_SLOTS_COST"])
         clan_system.buy_clan_slot(leader_id=author.id, how=how)
-        money_system.take_money_for_clan(author.id, amount=how / 5 * CLANS["CLAN_5_SLOTS_COST"])
         return await ctx.respond(embed=DefaultEmbed(f'***```{author.name}, вы приобрели {how} слотов для клана.```***'))
 
 

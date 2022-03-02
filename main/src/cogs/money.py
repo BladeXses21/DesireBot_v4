@@ -1,5 +1,6 @@
 from discord.ext import commands
-
+import discord
+from discord.commands import CommandPermission, SlashCommandGroup
 from cogs.base import BaseCog
 from config import ClANS_GUILD_ID
 from systems.money_system import money_system
@@ -10,6 +11,7 @@ class MoneyCog(BaseCog):
         super().__init__(client)
         self.client = client
         self.guild = None
+
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -23,6 +25,9 @@ class MoneyCog(BaseCog):
 
         for member in self.guild.members:
             money_system.add_all_clan_members_into_collection(member_id=member.id)
+
+
+
 
 
         # for self.guild in self.client.guilds:

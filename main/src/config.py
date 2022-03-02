@@ -1,10 +1,7 @@
 # Токен бота
-Token = 'ODY2MDUwNzkzMzAwMDMzNTk2.YPM6pw.f9Nq9JwLJHBZis3MwFUH3TOBCjs'
+Token = 'ODY2MDUwNzkzMzAwMDMzNTk2.YPM6pw.MNi_pgrmbBOp_zcuS9KIH90q0Xs'
 
 # MongoDb token
-# Dziantao DB
-# MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
-
 # BladeXses DB
 MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
 
@@ -29,7 +26,8 @@ CLANS = {
     'CHANGE_COLOR_COST': 3000,
     'CLAN_5_SLOTS_COST': 1500,
     'CLAN_CONSLIGER_COST': 3000,
-    'CLAN_START_MEMBER_SLOT': 25
+    'CLAN_START_MEMBER_SLOT': 25,
+    'CLAN_MAX_MEMBER_SLOT': 150
 }
 
 CLANS_ROLES = {
