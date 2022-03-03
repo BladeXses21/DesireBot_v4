@@ -351,8 +351,7 @@ class ClansCog(BaseCog):
         get_clan_info = clan_system.get_clan_info_by_leader_id(leader_id=author.id)
 
         if get_clan_info['clan_member_slot'] >= CLANS['CLAN_MAX_MEMBER_SLOT']:
-            return await ctx.respond(
-                embed=DefaultEmbed('***```Вы достигли максимального количества слотов в клане```***'))
+            return await ctx.respond(embed=DefaultEmbed('***```Вы достигли максимального количества слотов в клане```***'))
         if how > 25:
             return await ctx.respond(embed=DefaultEmbed('***```Нельзя купить больше 25 слотов за раз.```***'))
         if how < 5:
