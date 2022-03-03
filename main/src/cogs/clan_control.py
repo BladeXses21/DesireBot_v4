@@ -65,7 +65,7 @@ class ClanControl(BaseCog):
                     _accept = Embed(title='Проверка на афк', description=f'***```Не забудь сдать провепку в конце.```***')
                     _accept.add_field(name='Время принятия:', value=f'<t:{self.create_time}>')
                     _accept.add_field(name='Кто проводит:', value=interaction.user.mention, inline=True)
-
+                    button_start.disabled = True
                     return await msg.edit(embed=_accept, view=view)
 
         async def FinishCallback(interaction: discord.Interaction):
