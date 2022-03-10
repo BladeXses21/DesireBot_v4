@@ -14,6 +14,7 @@ class DeleteEmbed(object):
     def embed(self):
         return self._embed
 
+
 class ZamEmbed(object):
     def __init__(self, author, member, clan_name, zum_num):
         self._embed = Embed(

@@ -1,5 +1,5 @@
 # Токен бота
-Token = 'ODY2MDUwNzkzMzAwMDMzNTk2.YPM6pw.MNi_pgrmbBOp_zcuS9KIH90q0Xs'
+Token = 'OTQ5NDg1NzkxNzI4NTE3MTIw.YiLDjQ.Y9UvqHW2xT1dPmckZphPtoE0Nxo'
 
 # MongoDb token
 # BladeXses DB
@@ -8,6 +8,9 @@ MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/
 # ID сервера
 GUILD_ID = 866061390313029662, 514860704541573120
 ClANS_GUILD_ID = 866061390313029662
+
+# User ids
+USER_ID = 450361269128790026
 
 # Префикс бота
 PREFIX = '.'

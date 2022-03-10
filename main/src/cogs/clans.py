@@ -9,12 +9,11 @@ from discord.commands import Option, slash_command
 from discord.ui import Button
 
 from cogs.base import BaseCog
-from config import GUILD_ID, ADMIN_ROLE, MODER_ROLE, CLANS, CLANS_ROLES, ClANS_GUILD_ID
+from config import CLANS, CLANS_ROLES, ClANS_GUILD_ID
 from embeds.def_embed import DefaultEmbed
 from embeds.clans_embed import DeleteEmbed, ZamEmbed
 from systems.clans_system import clan_system
 from systems.money_system import money_system
-from base_error import on_cmd_error
 
 
 def is_clan_leader():
@@ -83,7 +82,7 @@ class ClansCog(BaseCog):
 
         await ctx.respond(embed=DefaultEmbed(f'Нужно подтверждение удаление клана.'), view=view, ephemeral=True)
 
-        async def AcceptDelete(interaction: discord.Interaction):
+        async def accept_delete(interaction: discord.Interaction):
 
             if interaction.user != author:
                 await interaction.response.send_message(embed=DefaultEmbed('Hey! You can`t use that!'))
@@ -98,15 +97,15 @@ class ClansCog(BaseCog):
                 await guild.get_channel(text_id).delete()
                 return await interaction.response.send_message(embed=DeleteEmbed(clan_name=clan_name, img_url=img_url).embed)
 
-        async def DeclineDelete(interaction: discord.Interaction):
+        async def decline_delete(interaction: discord.Interaction):
             if interaction.user != author:
                 await interaction.response.send_message(embed=DefaultEmbed('Hey! You can`t use that!'))
                 return False
             else:
                 return await interaction.response.send_message(embed=DefaultEmbed(f'Удаление клана не подтверждено'))
 
-        button_accept.callback = AcceptDelete
-        button_decline.callback = DeclineDelete
+        button_accept.callback = accept_delete
+        button_decline.callback = decline_delete
 
     @slash_command(name='clan_create', description='Create clans', guild_ids=[ClANS_GUILD_ID])
     async def clan_create(self, ctx, color: Option(str, 'Enter clan color', required=True),
@@ -121,7 +120,7 @@ class ClansCog(BaseCog):
             r = int(color[0:2], 16)
             g = int(color[2:4], 16)
             b = int(color[4:6], 16)
-        except:
+        except TypeError | ValueError:
             return await ctx.respond(embed=DefaultEmbed('***```Неправильно написан цвет.```***'))
 
         if len(clan_name) <= 2:
@@ -181,18 +180,18 @@ class ClansCog(BaseCog):
         if clan_info['clan_member_number'] >= clan_info['clan_member_slot']:
             return await ctx.respond(embed=DefaultEmbed('Вы достигли лимита пользователей, докупить слоты.'))
 
-        async def AcceptCallback(interaction: discord.Interaction):
+        async def accept_callback(interaction: discord.Interaction):
             await member.add_roles(clan_role)
             clan_system.clan_invite(clan_role_id=clan_info['clan_role_id'], member_id=member.id, invite_time=self.create_time)
             await interaction.response.send_message(embed=DefaultEmbed(f'***```Вы приняли приглашение в клан {clan_info["clan_name"]}!```***'))
             return await ctx.send(embed=DefaultEmbed(f'***```{member}, теперь участник вашего клане!```***'))
 
-        async def DeclineCallback(interaction: discord.Interaction):
+        async def decline_callback(interaction: discord.Interaction):
             await interaction.response.send_message(embed=DefaultEmbed(f'***```Вы отклонили приглашение в клан: {clan_info["clan_name"]}!```***'))
             return await ctx.send(embed=DefaultEmbed(f'***```{member}, не принял приглашение в клан!```***'))
 
-        button1.callback = AcceptCallback
-        button2.callback = DeclineCallback
+        button1.callback = accept_callback
+        button2.callback = decline_callback
 
     @slash_command(name='clan_kick', description='Use to kick member on your clan', guilds_ids=[ClANS_GUILD_ID])
     @is_clan_leader()
@@ -201,18 +200,19 @@ class ClansCog(BaseCog):
         clan_member_id = clan_system.find_clan_member(member.id)
         get_clan_info_by_leader = clan_system.get_clan_info_by_leader_id(leader_id=author.id)
         get_clan_info_member = clan_system.get_clan_role_id_by_member_id(member_id=member.id)
+        check_member_for_a_zam = clan_system.check_member_for_a_zam_by_member_id(member_id=member.id)
 
         if member.id is author.id:
-            return await ctx.respond(embed=DefaultEmbed(f'***```Нельзя пригласить самого себя!```***'))
+            return await ctx.respond(embed=DefaultEmbed(f'***```Нельзя выгнать самого себя!```***'))
         if member.id != clan_member_id:
             return await ctx.respond(embed=DefaultEmbed(f'***```Пользователь не находиться в клане!```***'))
         if get_clan_info_by_leader['clan_role_id'] != get_clan_info_member['clan_role_id']:
             return await ctx.respond(embed=DefaultEmbed(f'***```Пользователь не в вашем клане!```***'))
 
         clan_name, clan_role_id = clan_system.clan_leave(member_id=member.id)
-        # todo - не работает кик заместителя из клана !!!
-        if clan_system.check_member_for_a_zam_by_member_id(member_id=member.id):
-            clan_system.remove_zam_member_from_clan(clan_role_id=get_clan_info_by_leader['clan_role_id'], member_id=author.id)
+
+        if member.id == check_member_for_a_zam:
+            clan_system.remove_zam_member_from_clan(clan_role_id=get_clan_info_member['clan_role_id'], member_id=author.id)
 
         return await ctx.respond(embed=DefaultEmbed(f'***```Вы кикнули {member.name} из клана {clan_name}```***'))
 
@@ -270,7 +270,7 @@ class ClansCog(BaseCog):
 
         try:
             urllib.request.urlopen(image_url)
-        except:
+        except ValueError | TypeError:
             return await ctx.respond(embed=DefaultEmbed(f'Плохая ссылка!'))
 
         clan_system.set_flag(leader_id=ctx.author.id, image_url=image_url)

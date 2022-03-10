@@ -3,3 +3,4 @@ def on_cmd_error(ctx, error):
         return '***```Вы не лидер клана!```***'
     elif str(error) == 'not clan user':
         return '***```Вы не участник клана!```***'
+

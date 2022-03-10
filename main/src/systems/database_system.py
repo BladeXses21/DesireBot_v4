@@ -38,3 +38,15 @@ class DatabaseSystem(object):
     @property
     def clan_curator_collection(self):
         return self.db.clan_curator
+
+    @property
+    def clan_control_check_collection(self):
+        return self.db.clontrol_checks
+
+    @property
+    def event_boss_collection(self):
+        return self.db.boss_collection
+
+    @property
+    def battle_collection(self):
+        return self.db.battle_collection
