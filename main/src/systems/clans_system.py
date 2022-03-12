@@ -1,6 +1,7 @@
 from systems.database_system import DatabaseSystem
 import time
 from config import CLANS
+from clan_event.user_type import User
 
 
 class ClanSystem(DatabaseSystem):
@@ -14,7 +15,7 @@ class ClanSystem(DatabaseSystem):
             return True
         return False
 
-    def create_clan(self, leader_id: int, role_id: int, clan_name: str, voice_id: int, text_id: int, color, create_time: int):
+    def create_clan(self, leader_id: int, role_id: int, clan_name: str, voice_id: int, text_id: int, color, create_time: int, name, health, user_id, atack_dmg):
 
         if self.clan_collection.find_one({'leader_id': leader_id}):
             return False
@@ -35,7 +36,6 @@ class ClanSystem(DatabaseSystem):
             'clan_color': color,
             'deleted_at': None
         })
-
         self.clan_member_collection.insert_one({
             'clan_role_id': role_id,
             'member_id': leader_id,
@@ -44,7 +44,10 @@ class ClanSystem(DatabaseSystem):
 
         self.clan_member_details_collection.insert_one({
             'clan_role_id': role_id,
-            'member_id': leader_id,
+            'member_name': name,
+            'member_health': health,
+            'member_id': user_id,
+            'member_dmg': atack_dmg,
             'member_online': 0,
             'member_invite_time': create_time,
             'member_afk': 0,
@@ -59,10 +62,10 @@ class ClanSystem(DatabaseSystem):
         })
         return True
 
-    def clan_invite(self, clan_role_id: int, member_id: int, invite_time: int):
+    def clan_invite(self, clan_role_id: int, name, health, member_id: int, atack_dmg, invite_time: int):
         new_clan_member = {"clan_role_id": clan_role_id, "member_id": member_id}
-        member_details = {'clan_role_id': clan_role_id, "member_id": member_id, 'member_online': 0, 'member_invite_time': invite_time, 'member_afk': 0,
-                          'delete_at': None}
+        member_details = {'clan_role_id': clan_role_id, 'member_name': name, 'member_health': health, "member_id": member_id, "member_dmg": atack_dmg, 'member_online': 0,
+                          'member_invite_time': invite_time, 'member_afk': 0, 'delete_at': None}
         self.clan_collection.update_one({'clan_role_id': clan_role_id}, {'$inc': {'clan_member_number': +1}})
         self.clan_member_collection.insert_one(new_clan_member)
         self.clan_member_details_collection.insert_one(member_details)
@@ -79,11 +82,6 @@ class ClanSystem(DatabaseSystem):
         if not res:
             return ()
 
-        # self.clan_collection.update_one({'leader_id': leader_id}, {'$set': {'deleted_at': int(time.time())}})
-        # self.clan_member_collection.update_many({'clan_role_id': res['clan_role_id']},
-        #                                         {'$set': {'deleted_at': int(time.time())}})
-        # self.clan_member_details_collection.update_one({'clan_role_id': res['clan_role_id']},
-        #                                                {'$set': {'deleted_at': int(time.time())}})
         self.clan_collection.delete_one({'leader_id': leader_id})
         self.clan_member_collection.delete_many({'clan_role_id': res['clan_role_id']})
         self.clan_member_details_collection.delete_many({'clan_role_id': res["clan_role_id"]})

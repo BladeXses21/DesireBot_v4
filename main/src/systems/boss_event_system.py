@@ -1,3 +1,4 @@
+from clan_event.user_type import User
 from systems.database_system import DatabaseSystem
 from clan_event.boss_type import Enemy
 import random
@@ -34,6 +35,10 @@ class EventSystem(DatabaseSystem):
     def change_health_current_boss(self, enemy: Enemy):
         self.battle_collection.update_one({}, {"$set": {'health': enemy.health}})
         return True
+
+    def get_user_who_atack(self, member_id: int):
+        get_user = self.clan_member_details_collection.find_one({'member_id': member_id}, {})
+        return User(get_user['member_name'], get_user['member_health'], get_user['member_id'], get_user['member_dmg'])
 
 
 event_system = EventSystem()

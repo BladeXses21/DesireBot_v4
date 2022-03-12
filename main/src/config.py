@@ -1,12 +1,11 @@
 # Токен бота
-Token = 'OTQ5NDg1NzkxNzI4NTE3MTIw.YiLDjQ.Y9UvqHW2xT1dPmckZphPtoE0Nxo'
+Token = 'ODY2MDUwNzkzMzAwMDMzNTk2.YPM6pw.ydkfdaQT_hMroG5vYEXFJUpF8qg'
 
 # MongoDb token
 # BladeXses DB
 MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
 
 # ID сервера
-GUILD_ID = 866061390313029662, 514860704541573120
 ClANS_GUILD_ID = 866061390313029662
 
 # User ids
@@ -46,3 +45,10 @@ CLANS_ROLES = {
 TIMELY = 20
 EMOTION_COST = 20
 START_MONEY = 200
+
+
+USER_CHARACTERS = {
+    'START_HEALTH': 25,
+    'START_ATACK_DMG': 1
+
+}
