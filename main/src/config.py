@@ -3,7 +3,9 @@ Token = 'ODY2MDUwNzkzMzAwMDMzNTk2.YPM6pw.ydkfdaQT_hMroG5vYEXFJUpF8qg'
 
 # MongoDb token
 # BladeXses DB
-MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
+# MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
+# DzianTao DB
+MongoToken = 'mongodb+srv://DesireBot:PiLeJcaVFhesIe02@cluster0.e9eia.mongodb.net/DesireBotDB?retryWrites=true&w=majority'
 
 # ID сервера
 ClANS_GUILD_ID = 866061390313029662
@@ -21,8 +23,8 @@ MODER_ROLE = 882645477512859709
 # Для кланов
 CLANS = {
     'CLAN_CHAT': 948703886636646470,
-    'CLAN_VOICE_CATEGORY': 885629335338360932,
-    'CLAN_TEXT_CATEGORY': 893688017049501708,
+    'CLAN_VOICE_CATEGORY': 952256288191037531,
+    'CLAN_TEXT_CATEGORY': 952256343153213570,
     'CLAN_AVATAR_CHANGE': 2000,
     'CLAN_CREATE_COST': 15000,
     'CHANGE_NAME_COST': 5000,
@@ -46,9 +48,5 @@ TIMELY = 20
 EMOTION_COST = 20
 START_MONEY = 200
 
-
-USER_CHARACTERS = {
-    'START_HEALTH': 25,
-    'START_ATACK_DMG': 1
-
-}
+NEW_HERO_START_HEALTH = 100
+NEW_HERO_START_ATTACK = 1

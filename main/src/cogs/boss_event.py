@@ -1,11 +1,12 @@
+import discord
 from discord.commands import slash_command
 from config import ClANS_GUILD_ID
-from embeds.boss_event_embed import BossView
+from embeds.boss_event.boss_embed import BossView
 from cogs.base import BaseCog
-from systems.boss_event_system import event_system
-from clan_event.boss_type import Enemy
-from clan_event.user_type import User
-import discord
+from embeds.boss_event.hero_embed import HeroStatsView
+from embeds.boss_event.hit_embed import HitView
+from systems.boss_event_system.boss_system import boss_system
+from systems.boss_event_system.hero_system import hero_system
 
 
 class BossBattle(BaseCog):
@@ -16,29 +17,55 @@ class BossBattle(BaseCog):
 
     @slash_command(name='start', description='Start Boss Embed', guild_ids=[ClANS_GUILD_ID])
     async def start(self, ctx):
-        boss = event_system.get_random_boss()
+        boss = boss_system.get_random_boss()
 
-        event_system.boss_fight(boss)
-        return await ctx.send(embed=BossView(event_system.get_current_boss()).embed)
+        boss_system.boss_fight(boss)
+        return await ctx.send(embed=BossView(boss_system.get_current_boss()).embed)
 
     @slash_command(name='create_enemy', description='Start Boss Embed', guild_ids=[ClANS_GUILD_ID])
-    async def create_enemy(self, ctx, name: str, health: int, atack_dmg: int, image: str):
-        event_system.create_boss(name=name, health=health, atack_dmg=atack_dmg, image=image)
+    async def create_enemy(self, ctx, name: str, health: int, attack_dmg: int, image: str):
+        boss_system.create_boss(name, health, attack_dmg, image)
         await ctx.send(f'***```Boss {name} has been created```***')
 
-    @slash_command(name='atack', description='Atack enemy', guild_ids=[ClANS_GUILD_ID])
-    async def atack(self, interaction: discord.interactions):
-        user = event_system.get_user_who_atack(member_id=interaction.user.id)
-        boss = event_system.get_current_boss()
-        print(user, '-------', boss)
-        boss.take_dmg(1)
-        user.take_dmg(1)
-        event_system.change_health_current_boss(boss)
-        await interaction.response.send_message(embed=BossView(boss).embed)
+    @slash_command(name='attack_enemy', description='Attack enemy', guild_ids=[ClANS_GUILD_ID])
+    async def attack_enemy(self,  interaction: discord.Interaction):
+        user = interaction.user
+        global hero
 
+        hero = hero_system.get_hero_by_id(user.id)
+        if hero is None:
+            hero_system.create_new_hero(user)
+            hero = hero_system.get_hero_by_id(user.id)
+
+        boss = boss_system.get_current_boss()
+
+        boss.take_dmg(hero.attack_dmg)
+        hero.take_dmg(boss.attack_dmg)
+
+        await interaction.response.send_message(embed=HitView(hero).embed, ephemeral=True)
+        print(hero.health, '-------', boss.health)
+
+        boss_system.change_health(boss)
+        hero_system.change_health(hero)
+
+        # await interaction.response.send_message(embed=BossView(boss).embed)
+
+    @slash_command(name='stats', description='Show user stats in boss event', guild_ids=[ClANS_GUILD_ID])
+    async def my_stats(self,  interaction: discord.Interaction):
+        user = interaction.user
+
+        global hero
+        hero = hero_system.get_hero_by_id(user.id)
+
+        # if user not exist in database yet, create him and continue command
+        if hero is None:
+            hero_system.create_new_hero(user)
+            hero = hero_system.get_hero_by_id(user.id)
+
+        await interaction.response.send_message(embed=HeroStatsView(hero).embed, ephemeral=True)
     # todo - поле урону в юзерів клану, зчитувати поле урону з юзера / поле хп в юзера / получення урону юзера в функції take_dmg | створити клас User✔ |
     # todo - зробити перевірку на ха юзера, якщо вони дойшло до 0 видавати ембет і виводило час ресу
-    # todo - start_battle повинно перевіряти чи є в боса хп, якщо ні то добавляти нового (перевірка atack_enemy)
+    # todo - start_battle повинно перевіряти чи є в боса хп, якщо ні то добавляти нового (перевірка attack_enemy)
 
 
 def setup(client):

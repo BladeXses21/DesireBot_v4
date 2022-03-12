@@ -9,13 +9,11 @@ from discord.commands import Option, slash_command
 from discord.ui import Button
 
 from cogs.base import BaseCog
-from config import CLANS, CLANS_ROLES, ClANS_GUILD_ID, USER_CHARACTERS
+from config import CLANS, CLANS_ROLES, ClANS_GUILD_ID
 from embeds.def_embed import DefaultEmbed
 from embeds.clans_embed import DeleteEmbed, ZamEmbed
 from systems.clans_system import clan_system
 from systems.money_system import money_system
-
-from clan_event.user_type import User
 
 
 def is_clan_leader():
@@ -157,10 +155,9 @@ class ClansCog(BaseCog):
         await voice_channel.set_permissions(clans_role, overwrite=overwrites_voice)
 
         clan_system.create_clan(leader_id=author.id, clan_name=clan_name, role_id=role.id, voice_id=voice_channel.id, text_id=text_channel.id, color=color,
-                                create_time=self.create_time, name=author.name, health=USER_CHARACTERS['START_HEALTH'], user_id=author.id,
-                                atack_dmg=USER_CHARACTERS['START_ATACK_DMG'])
+                                create_time=self.create_time)
         money_system.take_money_for_clan(author_id=author.id, amount=CLANS["CLAN_CREATE_COST"])
-        return await interaction.response.send_message(embed=DefaultEmbed(f'***```Клан {clan_name} был успешно создан.```***'))
+        return await interaction.edit_original_message(embed=DefaultEmbed(f'***```Клан {clan_name} был успешно создан.```***'))
 
     @slash_command(name='clan_invite', description='To invite a clan', guild_ids=[ClANS_GUILD_ID])
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -191,8 +188,7 @@ class ClansCog(BaseCog):
 
         async def accept_callback(interaction: discord.Interaction):
             await member.add_roles(clan_role)
-            clan_system.clan_invite(clan_role_id=clan_info['clan_role_id'], name=member.name, health=USER_CHARACTERS['START_HEALTH'], member_id=member.id,
-                                    atack_dmg=USER_CHARACTERS['START_ATACK_DMG'], invite_time=self.create_time)
+            clan_system.clan_invite(clan_role_id=clan_info['clan_role_id'], member_id=member.id, invite_time=self.create_time)
             await interaction.response.send_message(embed=DefaultEmbed(f'***```Вы приняли приглашение в клан {clan_info["clan_name"]}!```***'))
             return await ctx.send(embed=DefaultEmbed(f'***```{member}, теперь участник вашего клане!```***'))
 

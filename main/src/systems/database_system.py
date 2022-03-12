@@ -48,5 +48,9 @@ class DatabaseSystem(object):
         return self.db.boss_collection
 
     @property
-    def battle_collection(self):
-        return self.db.battle_collection
+    def event_hero_collection(self):
+        return self.db.hero_collection
+
+    @property
+    def event_battle_collection(self):
+        return self.db.event_battle_collection
