@@ -7,6 +7,8 @@ name = "pypi"
 pymongo = "*"
 py-cord = "==2.0.0b1"
 dnspython = "*"
+typing = "*"
+typing-extensions = "*"
 
 [dev-packages]
 

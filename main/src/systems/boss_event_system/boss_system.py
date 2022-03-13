@@ -31,7 +31,7 @@ class BossSystem(DatabaseSystem):
         return Enemy(get_enemy['name'], get_enemy['health'], get_enemy['attack_dmg'], get_enemy['image'])
 
     def change_health(self, enemy: Enemy):
-        self.event_battle_collection.update_one({'name': enemy.name}, {'$set' : {'health': enemy.health}})
+        self.event_battle_collection.update_one({'name': enemy.name}, {'$set': {'health': enemy.health}})
         return True
 
 

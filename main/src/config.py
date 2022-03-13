@@ -3,9 +3,9 @@ Token = 'ODY2MDUwNzkzMzAwMDMzNTk2.YPM6pw.ydkfdaQT_hMroG5vYEXFJUpF8qg'
 
 # MongoDb token
 # BladeXses DB
-# MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
+MongoToken = 'mongodb+srv://DesireBot:kopanura200121@cluster0.c1j11.mongodb.net/DesireBot?retryWrites=true&w=majority'
 # DzianTao DB
-MongoToken = 'mongodb+srv://DesireBot:PiLeJcaVFhesIe02@cluster0.e9eia.mongodb.net/DesireBotDB?retryWrites=true&w=majority'
+# MongoToken = 'mongodb+srv://DesireBot:PiLeJcaVFhesIe02@cluster0.e9eia.mongodb.net/DesireBotDB?retryWrites=true&w=majority'
 
 # ID сервера
 ClANS_GUILD_ID = 866061390313029662
