@@ -43,7 +43,6 @@ class ClansCog(BaseCog):
         self.clans_text_category = None
         self.leader_role = None
         self.guild = None
-        self.create_time = None
         self.everyone_role = None
 
     @commands.Cog.listener()
@@ -65,7 +64,6 @@ class ClansCog(BaseCog):
 
         self.leader_role = discord.utils.get(self.guild.roles, name=CLANS_ROLES['LEADER_ROLE_NAME'])
         self.everyone_role = discord.utils.get(self.guild.roles, name="@everyone")
-        self.create_time = int(time.time())
 
     @slash_command(name='clan_delete', description='delete your clan')
     @is_clan_leader()
@@ -155,7 +153,7 @@ class ClansCog(BaseCog):
         await voice_channel.set_permissions(clans_role, overwrite=overwrites_voice)
 
         clan_system.create_clan(leader_id=author.id, clan_name=clan_name, role_id=role.id, voice_id=voice_channel.id, text_id=text_channel.id, color=color,
-                                create_time=self.create_time)
+                                create_time=int(time.time()))
         money_system.take_money_for_clan(author_id=author.id, amount=CLANS["CLAN_CREATE_COST"])
         return await interaction.edit_original_message(embed=DefaultEmbed(f'***```Клан {clan_name} был успешно создан.```***'))
 
@@ -188,7 +186,7 @@ class ClansCog(BaseCog):
 
         async def accept_callback(interaction: discord.Interaction):
             await member.add_roles(clan_role)
-            clan_system.clan_invite(clan_role_id=clan_info['clan_role_id'], member_id=member.id, invite_time=self.create_time)
+            clan_system.clan_invite(clan_role_id=clan_info['clan_role_id'], member_id=member.id, invite_time=int(time.time()))
             await interaction.response.send_message(embed=DefaultEmbed(f'***```Вы приняли приглашение в клан {clan_info["clan_name"]}!```***'))
             return await ctx.send(embed=DefaultEmbed(f'***```{member}, теперь участник вашего клане!```***'))
 

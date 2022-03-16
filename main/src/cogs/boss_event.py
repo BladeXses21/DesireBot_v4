@@ -78,7 +78,7 @@ class BossBattle(BaseCog):
         inventory_system.add_new_item(item=Item(name, item_type))
         await interaction.response.send_message(embed=DefaultEmbed(f'***```{interaction.user.name}, вы добавили {name} типу {item_type}```***'))
 
-    # todo - поле урону в юзерів клану, зчитувати поле урону з юзера / поле хп в юзера / получення урону юзера в функції take_dmg |
+    # todo  получення урону юзера в функції take_dmg |
     # todo - зробити перевірку на ха юзера, якщо вони дойшло до 0 видавати ембет і виводило час ресу
     # todo - start_battle повинно перевіряти чи є в боса хп, якщо ні то добавляти нового (перевірка attack_enemy)
 
