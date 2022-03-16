@@ -59,6 +59,3 @@ class DatabaseSystem(object):
     def item_collection(self):
         return self.db.item_collection
 
-    @property
-    def inventory_collection(self):
-        return self.db.inventory_collection
