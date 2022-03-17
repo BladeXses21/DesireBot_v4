@@ -3,8 +3,9 @@ from datetime import datetime
 
 from discord import User
 
+from clan_event.inventory_types.hero_inventory import HeroInventory
 from clan_event.inventory_types.inventory_type import Inventory
-from config import NEW_HERO_START_ATTACK, NEW_HERO_START_HEALTH
+from config import NEW_HERO_START_ATTACK, NEW_HERO_START_HEALTH, NEW_HERO_START_INVENTORY
 from clan_event.lifeform_types.hero_type import Hero
 from systems.database_system import DatabaseSystem
 
@@ -17,8 +18,13 @@ class HeroSystem(DatabaseSystem):
             'name': user.name,
             'regen_time': time.time(),
             'max_health': NEW_HERO_START_HEALTH,
-            # 'inventory': Inventory(),
             'attack_dmg': NEW_HERO_START_ATTACK,
+            'inventory': NEW_HERO_START_INVENTORY.__dict__
+            # 'inventory': {
+            #     'equipped': NEW_HERO_START_INVENTORY.equipped.slots,
+            #     'items': NEW_HERO_START_INVENTORY.items,
+            #     'size': NEW_HERO_START_INVENTORY.max_size
+            # },
         })
         return True
 
@@ -29,19 +35,24 @@ class HeroSystem(DatabaseSystem):
         if hero_data is not None:
             return Hero(hero_data['hero_id'], hero_data['name'],
                         self.time_to_health(hero_data['regen_time'], hero_data['max_health']),
-                        hero_data['max_health'], hero_data['attack_dmg'])
+                        hero_data['max_health'], hero_data['attack_dmg'], hero_data['inventory'])
 
         hero_system.create_new_hero(user)
         hero_data = self.event_hero_collection.find_one({'hero_id': user.id}, {})
         return Hero(hero_data['hero_id'], hero_data['name'],
                     self.time_to_health(hero_data['regen_time'], hero_data['max_health']),
-                    hero_data['max_health'], hero_data['attack_dmg'])
+                    hero_data['max_health'], hero_data['attack_dmg'], hero_data['inventory'])
 
     def change_health(self, hero: Hero):
         self.event_hero_collection.update_one({'hero_id': hero.hero_id},
                                               {"$set": {'regen_time': self.health_to_time(hero.current_health
                                                                                           , hero.max_health)
                                                         }})
+        return True
+
+    def change_inventory(self, hero: Hero):
+        self.event_hero_collection.update_one({'hero_id': hero.hero_id},
+                                              {"$set": {'inventory': hero.inventory}})
         return True
 
     @staticmethod

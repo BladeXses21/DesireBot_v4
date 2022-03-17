@@ -6,18 +6,9 @@ from clan_event.inventory_types.item_type import Item
 
 
 class Inventory:
-    def __init__(self):
-        self.equipped = EquippedInventory()
+    def __init__(self, size: int):
         self.items = []
-        self.max_size = 15
-
-    def equip(self, item: Item):
-        if not self.items.__contains__(item):
-            print("Such item does not exist in your inventory. Therefore it cannot be equipped")
-            return
-
-        self.items.remove(item)
-        self.equipped.equip(item)
+        self.max_size = size
 
     def add_item(self, item: Item):
         if len(self.items) >= self.max_size:

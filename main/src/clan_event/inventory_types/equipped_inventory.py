@@ -8,12 +8,13 @@ class EquippedInventory:
     def __init__(self):
         self.slots = collections.ChainMap(
             {
-                EnumItemTypes.helmet: Item,
-                EnumItemTypes.chest: Item,
-                EnumItemTypes.pants: Item,
-                EnumItemTypes.boots: Item,
+                EnumItemTypes.helmet.value: None,
+                EnumItemTypes.gloves.value: None,
+                EnumItemTypes.chest.value: None,
+                EnumItemTypes.pants.value: None,
+                EnumItemTypes.boots.value: None,
 
-                EnumItemTypes.weapon: Item
+                EnumItemTypes.weapon.value: None
             })
 
     def equip(self, item: Item):
