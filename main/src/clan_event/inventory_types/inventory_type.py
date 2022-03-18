@@ -1,17 +1,14 @@
-import logging
-from enum import Enum, unique
-
-from clan_event.inventory_types.equipped_inventory import EquippedInventory
+import json
 from clan_event.inventory_types.item_type import Item
 
 
 class Inventory:
-    def __init__(self, size: int):
-        self.items = []
+    def __init__(self, size: int = 10, items=[]):
+        self.items = items
         self.max_size = size
 
     def add_item(self, item: Item):
-        if len(self.items) >= self.max_size:
+        if len(self.items) >= int(self.max_size):
             return
 
         self.items.append(item)
@@ -22,3 +19,6 @@ class Inventory:
             return
 
         self.items.remove(item)
+
+    def to_dict(self):
+        return json.loads(json.dumps(self, default=lambda o: o.__dict__))

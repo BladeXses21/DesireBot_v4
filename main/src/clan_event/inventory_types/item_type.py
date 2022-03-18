@@ -19,9 +19,9 @@ class EnumItemTypes(Enum):
 
 class Item:
     @staticmethod
-    def empty(self: EnumItemTypes):
-        return Item("empty", self)
+    def empty(type: EnumItemTypes):
+        return Item("empty", type)
 
-    def __init__(self, name: str, item_type: EnumItemTypes):
+    def __init__(self, name: str, type: EnumItemTypes):
         self.name = name
-        self.type = item_type
+        self.type = type

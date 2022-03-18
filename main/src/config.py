@@ -1,5 +1,4 @@
 # Токен бота
-from clan_event.inventory_types.hero_inventory import HeroInventory
 
 Token = 'ODY2MDUwNzkzMzAwMDMzNTk2.YPM6pw.ydkfdaQT_hMroG5vYEXFJUpF8qg'
 
@@ -52,4 +51,3 @@ START_MONEY = 200
 
 NEW_HERO_START_HEALTH = 100
 NEW_HERO_START_ATTACK = 1
-NEW_HERO_START_INVENTORY = HeroInventory(10)
