@@ -75,7 +75,21 @@ class BossBattle(BaseCog):
     async def take_item(self, interaction: discord.Interaction, item_name: str):
         hero = hero_system.get_hero_by_user(interaction.user)
 
-        hero.inventory.add_item(items_system.find_by_name(item_name))
+        item = items_system.find_by_name(item_name)
+        if item is None:
+            await interaction.response.send_message(embed=HeroInventoryView(hero).embed)
+            return
+
+        hero.inventory.add_item(item)
+
+        hero_system.modify_inventory(hero)
+        await interaction.response.send_message(embed=HeroInventoryView(hero).embed)
+
+    @slash_command(name='equip_item', description='equip item from your inventory', guild_ids=[ClANS_GUILD_ID])
+    async def equip_item(self, interaction: discord.Interaction, item_index: int):
+        hero = hero_system.get_hero_by_user(interaction.user)
+        inventory = hero.inventory
+        inventory.equip(inventory.item_by_index(item_index))
 
         hero_system.modify_inventory(hero)
         await interaction.response.send_message(embed=HeroInventoryView(hero).embed)

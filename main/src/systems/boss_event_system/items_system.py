@@ -15,7 +15,7 @@ class ItemsSystem(DatabaseSystem):
         item_data = self.item_collection.find_one({'name': item_name})
         if item_data is None:
             print("This item doesnt exist")
-            return
+            return None
 
         return Item.parse_obj(item_data)
 

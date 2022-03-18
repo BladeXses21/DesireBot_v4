@@ -8,6 +8,7 @@ class EquippedInventory(BaseModel):
     chest: Item = None
     pants: Item = None
     boots: Item = None
+    weapon: Item = None
 
     def equip(self, item: Item):
         match item.type:
@@ -21,5 +22,7 @@ class EquippedInventory(BaseModel):
                 self.pants = item
             case EnumItemTypes.boots:
                 self.boots = item
+            case EnumItemTypes.weapon:
+                self.weapon = item
             case _:
                 print("That item cannot be equipped")

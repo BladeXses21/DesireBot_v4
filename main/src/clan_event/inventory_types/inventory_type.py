@@ -16,6 +16,9 @@ class Inventory(BaseModel):
 
         self.items.append(item)
 
+    def item_by_index(self, item_index: int):
+        return self.items.__getitem__(item_index-1)
+
     def remove_item(self, item: Item):
         if len(self.items) <= 0:
             print("Inventory is empty already! Nothing to remove")

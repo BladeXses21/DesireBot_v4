@@ -5,13 +5,11 @@ from pydantic import BaseModel, Field
 
 @unique
 class EnumItemTypes(str, Enum):
-    # armor
     helmet = 'helmet'
     chest = 'chest'
     boots = 'boots'
     gloves = 'gloves'
     pants = 'pants'
-
     weapon = 'weapon'
 
     @classmethod
@@ -22,3 +20,6 @@ class EnumItemTypes(str, Enum):
 class Item(BaseModel):
     name: str
     type: EnumItemTypes = None
+
+    def get_name(self):
+        return self.name
