@@ -1,8 +1,10 @@
 from enum import Enum, unique
 
+from pydantic import BaseModel, Field
+
 
 @unique
-class EnumItemTypes(Enum):
+class EnumItemTypes(str, Enum):
     # armor
     helmet = 'helmet'
     chest = 'chest'
@@ -17,11 +19,6 @@ class EnumItemTypes(Enum):
         return list(map(lambda c: c.value, cls))
 
 
-class Item:
-    @staticmethod
-    def empty(type: EnumItemTypes):
-        return Item("empty", type)
-
-    def __init__(self, name: str, type: EnumItemTypes):
-        self.name = name
-        self.type = type
+class Item(BaseModel):
+    name: str
+    type: EnumItemTypes = None

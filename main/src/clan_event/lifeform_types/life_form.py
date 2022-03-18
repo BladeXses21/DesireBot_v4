@@ -1,8 +1,10 @@
-class LifeForm:
-    def __init__(self, name: str, current_health: int, max_health: int):
-        self.name = name
-        self.current_health = current_health
-        self.max_health = max_health
+from pydantic import BaseModel
+
+
+class LifeForm(BaseModel):
+    name: str
+    current_health: int
+    max_health: int
 
     def take_dmg(self, dmg: int):
         self.current_health = self.current_health - dmg

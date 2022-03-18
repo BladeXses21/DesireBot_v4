@@ -14,15 +14,13 @@ class ItemsSystem(DatabaseSystem):
     def find_by_name(self, item_name: str):
         item_data = self.item_collection.find_one({'name': item_name})
         if item_data is None:
+            print("This item doesnt exist")
             return
 
-        return Item(item_data['name'], item_data['type'])
+        return Item.parse_obj(item_data)
 
     def remove_item(self, item: Item):
-        self.item_collection.delete_one({
-            'name': item.name,
-            'type': item.type
-        })
+        self.item_collection.delete_one({'name': item.name})
 
 
 items_system = ItemsSystem()

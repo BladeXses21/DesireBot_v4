@@ -62,7 +62,7 @@ class BossBattle(BaseCog):
     @slash_command(name='create_item', description='Create new item in game', guild_ids=[ClANS_GUILD_ID])
     async def create_item(self, interaction: discord.Interaction, name: str,
                           item_type: Option(str, 'chose item', choices=EnumItemTypes.list(), required=True)):
-        items_system.create_new_item(item=Item(name, item_type))
+        items_system.create_new_item(item=Item(name=name, type=item_type))
         await interaction.response.send_message(
             embed=DefaultEmbed(f'***```{interaction.user.name}, вы добавили {name} типу {item_type}```***'))
 
@@ -72,7 +72,7 @@ class BossBattle(BaseCog):
         await interaction.response.send_message(embed=HeroInventoryView(hero).embed)
 
     @slash_command(name='take_item', description='Show your inventory', guild_ids=[ClANS_GUILD_ID])
-    async def take_item(self, interaction: discord.Interaction, item_name : str):
+    async def take_item(self, interaction: discord.Interaction, item_name: str):
         hero = hero_system.get_hero_by_user(interaction.user)
 
         hero.inventory.add_item(items_system.find_by_name(item_name))

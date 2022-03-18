@@ -1,11 +1,14 @@
 import json
+
+from pydantic import BaseModel
+from typing import List
+
 from clan_event.inventory_types.item_type import Item
 
 
-class Inventory:
-    def __init__(self, size: int = 10, items=[]):
-        self.items = items
-        self.max_size = size
+class Inventory(BaseModel):
+    items: List[Item] = []
+    max_size: int = 10
 
     def add_item(self, item: Item):
         if len(self.items) >= int(self.max_size):
@@ -19,6 +22,3 @@ class Inventory:
             return
 
         self.items.remove(item)
-
-    def to_dict(self):
-        return json.loads(json.dumps(self, default=lambda o: o.__dict__))

@@ -7,7 +7,8 @@ class BossSystem(DatabaseSystem):
     def create_boss(self, name: str, health: int, attack_dmg: int, image: str):
         self.event_boss_collection.insert_one({
             'name': name,
-            'health': health,
+            'current_health': health,
+            'max_health': health,
             'attack_dmg': attack_dmg,
             'image': image
         })
@@ -18,25 +19,23 @@ class BossSystem(DatabaseSystem):
 
         self.event_battle_collection.insert_one({
             'name': enemy.name,
-            'health': enemy.current_health,
+            'current_health': enemy.current_health,
+            'max_health': enemy.max_health,
             'attack_dmg': enemy.attack_dmg,
             'image': enemy.image
         })
         return True
 
-    # todo костиль з курент хп треба потім пофіксити
     def get_current_boss(self):
         enemy_data = self.event_battle_collection.find_one({})
-        return Enemy(enemy_data['name'], enemy_data['health'], enemy_data['health'], enemy_data['attack_dmg'],
-                     enemy_data['image'])
+        return Enemy.parse_obj(enemy_data)
 
     def get_random_boss(self):
         enemy_data = self.event_boss_collection.find_one({})
-        return Enemy(enemy_data['name'], enemy_data['health'], enemy_data['health'], enemy_data['attack_dmg'],
-                     enemy_data['image'])
+        return Enemy.parse_obj(enemy_data)
 
     def change_health(self, enemy: Enemy):
-        self.event_battle_collection.update_one({'name': enemy.name}, {'$set': {'health': enemy.current_health}})
+        self.event_battle_collection.update_one({'name': enemy.name}, {'$set': {'current_health': enemy.current_health}})
         return True
 
 

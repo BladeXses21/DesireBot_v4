@@ -1,8 +1,11 @@
 import time
 import json
 from collections import namedtuple
+from types import SimpleNamespace
+
 from discord import User
 
+from clan_event.inventory_types.equipped_inventory import EquippedInventory
 from clan_event.inventory_types.hero_inventory import HeroInventory
 from clan_event.inventory_types.inventory_type import Inventory
 from clan_event.inventory_types.item_type import Item, EnumItemTypes
@@ -13,50 +16,39 @@ from systems.database_system import DatabaseSystem
 
 class HeroSystem(DatabaseSystem):
     def create_new_hero(self, user: User) -> Hero:
-        hero = Hero(user.id, user.name, NEW_HERO_START_HEALTH, NEW_HERO_START_HEALTH, NEW_HERO_START_ATTACK,
-                    HeroInventory())
+        hero = Hero(id=user.id, name=user.name, current_health=NEW_HERO_START_HEALTH,
+                    max_health=NEW_HERO_START_HEALTH, attack_dmg=NEW_HERO_START_ATTACK)
+
         self.event_hero_collection.insert_one({
-            '_id': hero.hero_id,
+            'id': hero.get_id(),
             'name': hero.name,
-            'regen_time': self.health_to_time(hero.current_health, hero.max_health),
+            'current_health': self.health_to_time(hero.current_health, hero.max_health),
             'max_health': hero.max_health,
             'attack_dmg': hero.attack_dmg,
-            'inventory': hero.inventory.to_dict()
-            # 'inventory': {
-            #     'equipped': NEW_HERO_START_INVENTORY.equipped.slots,
-            #     'items': NEW_HERO_START_INVENTORY.items,
-            #     'size': NEW_HERO_START_INVENTORY.max_size
-            # },
+            'inventory': hero.inventory.dict()
         })
         return hero
 
     def get_hero_by_user(self, user: User):
-        hero_data = self.event_hero_collection.find_one({'_id': user.id}, {})
+        hero_data = self.event_hero_collection.find_one({'id': user.id}, {})
 
         # if user exist return him
         if hero_data is not None:
-            inv_data = hero_data['inventory']
-            items = []
-            for item_data in inv_data['items']:
-                items.append(Item(item_data['name'], item_data['type']))
-            return Hero(hero_data['_id'], hero_data['name'],
-                        self.time_to_health(hero_data['regen_time'], hero_data['max_health']),
-                        hero_data['max_health'], hero_data['attack_dmg'],
-                        HeroInventory(items, size=inv_data['max_size']))
+            return Hero.parse_obj(hero_data)
 
         new_hero = hero_system.create_new_hero(user)
         return new_hero
 
     def change_health(self, hero: Hero):
-        self.event_hero_collection.update_one({'_id': hero.hero_id},
-                                              {"$set": {'regen_time': self.health_to_time(hero.current_health
+        self.event_hero_collection.update_one({'id': hero.get_id()},
+                                              {"$set": {'current_health': self.health_to_time(hero.current_health
                                                                                           , hero.max_health)
                                                         }})
         return True
 
     def modify_inventory(self, hero: Hero):
-        self.event_hero_collection.update_one({'_id': hero.hero_id},
-                                              {"$set": {'inventory': hero.inventory.to_dict()}})
+        self.event_hero_collection.update_one({'id': hero.get_id()},
+                                              {"$set": {'inventory': hero.inventory.dict()}})
         return True
 
     @staticmethod

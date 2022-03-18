@@ -4,10 +4,7 @@ from clan_event.inventory_types.item_type import Item
 
 
 class HeroInventory(Inventory):
-    def __init__(self, items=[], size: int = 10,
-                 equipped: EquippedInventory = EquippedInventory()):
-        super().__init__(size, items)
-        self.equipped = equipped
+    equipped: EquippedInventory = EquippedInventory()
 
     def equip(self, item: Item):
         if not self.items.__contains__(item):
