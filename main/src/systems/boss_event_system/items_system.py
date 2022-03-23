@@ -1,3 +1,5 @@
+from typing import List
+
 from systems.database_system import DatabaseSystem
 from clan_event.inventory_types.item_type import Item
 

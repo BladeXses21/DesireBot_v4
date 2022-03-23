@@ -29,9 +29,9 @@ class BossBattle(BaseCog):
         await interaction.response.send_message(embed=BossView(boss_system.get_current_boss()).embed)
 
     @slash_command(name='create_enemy', description='Start Boss Embed', guild_ids=[ClANS_GUILD_ID])
-    async def create_enemy(self, ctx, name: str, health: int, attack_dmg: int, image: str):
+    async def create_enemy(self, interaction: discord.Interaction, name: str, health: int, attack_dmg: int, image: str):
         boss_system.create_boss(name, health, attack_dmg, image)
-        await ctx.send(f'***```Boss {name} has been created```***')
+        await interaction.response.send_message(f'***```Boss {name} has been created```***')
 
     @slash_command(name='attack_enemy', description='Attack enemy', guild_ids=[ClANS_GUILD_ID])
     async def attack_enemy(self, interaction: discord.Interaction):
@@ -61,7 +61,7 @@ class BossBattle(BaseCog):
 
     @slash_command(name='create_item', description='Create new item in game', guild_ids=[ClANS_GUILD_ID])
     async def create_item(self, interaction: discord.Interaction, name: str,
-                          item_type: Option(str, 'chose item', choices=EnumItemTypes.list(), required=True)):
+                          item_type: Option(str, 'choose item type', choices=EnumItemTypes.list(), required=True)):
         items_system.create_new_item(item=Item(name=name, type=item_type))
         await interaction.response.send_message(
             embed=DefaultEmbed(f'***```{interaction.user.name}, вы добавили {name} типу {item_type}```***'))
@@ -94,9 +94,23 @@ class BossBattle(BaseCog):
         hero_system.modify_inventory(hero)
         await interaction.response.send_message(embed=HeroInventoryView(hero).embed)
 
-    # todo  получення урону юзера в функції take_dmg |
-    # todo - зробити перевірку на ха юзера, якщо вони дойшло до 0 видавати ембет і виводило час ресу
-    # todo - start_battle повинно перевіряти чи є в боса хп, якщо ні то добавляти нового (перевірка attack_enemy)
+    @slash_command(name='remove_item', description='remove item from your inventory', guild_ids=[ClANS_GUILD_ID])
+    async def remove_item(self, interaction: discord.Interaction, item_index: int):
+        hero = hero_system.get_hero_by_user(interaction.user)
+        inventory = hero.inventory
+        inventory.remove_item(item_index)
+
+        hero_system.modify_inventory(hero)
+        await interaction.response.send_message(embed=HeroInventoryView(hero).embed)
+
+    @slash_command(name='add_boss_drop_item', description='', guild_ids=[ClANS_GUILD_ID])
+    async def add_boss_drop_item(self, interaction: discord.Interaction, boss_name: str, item_name: str):
+        boss = boss_system.get_boss_by_name(boss_name)
+        inventory = boss.inventory
+        inventory.add_item(items_system.find_by_name(item_name))
+
+        hero_system.modify_inventory(boss)
+        await interaction.response.send_message(embed=BossDropView(boss).embed)
 
 
 def setup(client):

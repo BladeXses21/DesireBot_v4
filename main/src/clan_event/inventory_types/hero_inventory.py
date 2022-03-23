@@ -12,4 +12,7 @@ class HeroInventory(Inventory):
             return
 
         self.items.remove(item)
-        self.equipped.equip(item)
+        previous_item = self.equipped.equip(item)
+
+        if previous_item is not None:
+            self.items.append(previous_item)

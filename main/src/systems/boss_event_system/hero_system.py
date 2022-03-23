@@ -34,6 +34,7 @@ class HeroSystem(DatabaseSystem):
 
         # if user exist return him
         if hero_data is not None:
+            hero_data['current_health'] = self.time_to_health(hero_data['current_health'], hero_data['max_health'])
             return Hero.parse_obj(hero_data)
 
         new_hero = hero_system.create_new_hero(user)
@@ -42,7 +43,7 @@ class HeroSystem(DatabaseSystem):
     def change_health(self, hero: Hero):
         self.event_hero_collection.update_one({'id': hero.get_id()},
                                               {"$set": {'current_health': self.health_to_time(hero.current_health
-                                                                                          , hero.max_health)
+                                                                                              , hero.max_health)
                                                         }})
         return True
 
