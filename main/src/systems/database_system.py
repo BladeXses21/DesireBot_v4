@@ -59,3 +59,7 @@ class DatabaseSystem(object):
     def item_collection(self):
         return self.db.item_collection
 
+    @property
+    def dmg_stats_collection(self):
+        return self.db.dmg_stats_collection
+

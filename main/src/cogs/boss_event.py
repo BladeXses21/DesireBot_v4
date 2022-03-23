@@ -2,6 +2,8 @@ import discord
 from discord import Option
 from discord.commands import slash_command
 
+from embeds.boss_event.battle_embed import BattleView
+from embeds.boss_event.boss_drop_embed import BossDropView
 from embeds.boss_event.heal_embed import HealView
 from embeds.boss_event.inventory_embed import HeroInventoryView
 from embeds.def_embed import DefaultEmbed
@@ -11,6 +13,7 @@ from embeds.boss_event.boss_embed import BossView
 from cogs.base import BaseCog
 from embeds.boss_event.hero_embed import HeroStatsView
 from embeds.boss_event.hit_embed import HitView
+from systems.boss_event_system.battle_system import battle_system
 from systems.boss_event_system.boss_system import boss_system
 from systems.boss_event_system.hero_system import hero_system
 from systems.boss_event_system.items_system import items_system
@@ -25,8 +28,14 @@ class BossBattle(BaseCog):
     async def start(self, interaction: discord.Interaction):
         boss = boss_system.get_random_boss()
 
-        boss_system.boss_fight(boss)
-        await interaction.response.send_message(embed=BossView(boss_system.get_current_boss()).embed)
+        battle_system.start_battle(boss)
+        # Todo create embed for battle info/ instead of boss view
+        await interaction.response.send_message(embed=BossView(battle_system.get_current_battle().enemy).embed)
+
+    @slash_command(name='boss', description='Start Boss Embed', guild_ids=[ClANS_GUILD_ID])
+    async def boss(self, interaction: discord.Interaction):
+        battle = battle_system.get_current_battle()
+        await interaction.response.send_message(embed=BattleView(battle, interaction.user).embed)
 
     @slash_command(name='create_enemy', description='Start Boss Embed', guild_ids=[ClANS_GUILD_ID])
     async def create_enemy(self, interaction: discord.Interaction, name: str, health: int, attack_dmg: int, image: str):
@@ -36,16 +45,15 @@ class BossBattle(BaseCog):
     @slash_command(name='attack_enemy', description='Attack enemy', guild_ids=[ClANS_GUILD_ID])
     async def attack_enemy(self, interaction: discord.Interaction):
         hero = hero_system.get_hero_by_user(interaction.user)
-        boss = boss_system.get_current_boss()
+        battle = battle_system.get_current_battle()
 
-        boss.take_dmg(hero.attack_dmg)
-        hero.take_dmg(boss.attack_dmg)
+        battle.fight_with(hero)
 
-        await interaction.channel.send(embed=BossView(boss).embed)
+        battle_system.record_dealt_dmg(battle)
+        hero_system.health_change(hero)
+
+        await interaction.channel.send(embed=BossView(battle.enemy).embed)
         await interaction.response.send_message(embed=HitView(hero).embed, ephemeral=True)
-
-        boss_system.change_health(boss)
-        hero_system.change_health(hero)
 
     @slash_command(name='stats', description='Show user stats in boss event', guild_ids=[ClANS_GUILD_ID])
     async def my_stats(self, interaction: discord.Interaction):
@@ -57,7 +65,7 @@ class BossBattle(BaseCog):
         hero = hero_system.get_hero_by_user(interaction.user)
         hero.full_regen()
         await interaction.response.send_message(embed=HealView(hero).embed, ephemeral=True)
-        hero_system.change_health(hero)
+        hero_system.health_change(hero)
 
     @slash_command(name='create_item', description='Create new item in game', guild_ids=[ClANS_GUILD_ID])
     async def create_item(self, interaction: discord.Interaction, name: str,
@@ -105,14 +113,14 @@ class BossBattle(BaseCog):
 
     @slash_command(name='add_boss_drop_item', description='', guild_ids=[ClANS_GUILD_ID])
     async def add_boss_drop_item(self, interaction: discord.Interaction, boss_name: str, item_name: str):
-        boss = boss_system.get_boss_by_name(boss_name)
+        boss = boss_system.get_by_name(boss_name)
         inventory = boss.inventory
         inventory.add_item(items_system.find_by_name(item_name))
 
-        hero_system.modify_inventory(boss)
+        boss_system.modify_inventory(boss)
         await interaction.response.send_message(embed=BossDropView(boss).embed)
 
 
 def setup(client):
     client.add_cog(BossBattle(client))
-    print("Cog 'boss battle' connected!")
+    print("Cog 'boss battle_types' connected!")

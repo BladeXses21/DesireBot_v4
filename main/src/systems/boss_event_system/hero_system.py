@@ -40,11 +40,13 @@ class HeroSystem(DatabaseSystem):
         new_hero = hero_system.create_new_hero(user)
         return new_hero
 
-    def change_health(self, hero: Hero):
+    def name_by_id(self, user_id: int) -> str:
+        return self.event_hero_collection.find_one({'id': user_id}, {'name': 1})['name']
+
+    def health_change(self, hero: Hero):
         self.event_hero_collection.update_one({'id': hero.get_id()},
                                               {"$set": {'current_health': self.health_to_time(hero.current_health
-                                                                                              , hero.max_health)
-                                                        }})
+                                                                                              , hero.max_health)}})
         return True
 
     def modify_inventory(self, hero: Hero):
