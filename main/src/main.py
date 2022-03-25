@@ -1,9 +1,10 @@
 import discord
 import os
+from discord.ext import commands
 
-from config import Token
+from config import Token, PREFIX
 
-client = discord.Bot(intents=discord.Intents.all())
+client = commands.Bot(command_prefix=PREFIX, help_command=None, intents=discord.Intents.all())
 
 
 @client.slash_command()

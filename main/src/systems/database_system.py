@@ -36,8 +36,12 @@ class DatabaseSystem(object):
         return self.db.clan_control
 
     @property
-    def clan_curator_collection(self):
-        return self.db.clan_curator
+    def clan_events_mode_collection(self):
+        return self.db.clan_events_mode
+
+    @property
+    def clan_events_collection(self):
+        return self.db.events_collection
 
     @property
     def clan_control_check_collection(self):
@@ -62,4 +66,3 @@ class DatabaseSystem(object):
     @property
     def dmg_stats_collection(self):
         return self.db.dmg_stats_collection
-

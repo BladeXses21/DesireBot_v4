@@ -15,7 +15,7 @@ class BattleView(object):
         number_of_hearts = floor(enemy.current_health / (enemy.max_health / 23))
         self._embed.description = f"**{enemy.name}**\n\n" \
                                   f"Здоров'я - {enemy.current_health}/{enemy.max_health}\n" \
-                                  f"{'❤' * number_of_hearts}{'🤍' * (23-number_of_hearts)}\n\n" \
+                                  f"{'<:heart_purples:956343794595426304>' * number_of_hearts}\n\n" \
                                   f"**Ти наніс -**  {battle.get_hero_dealt_dmg(user.id)} ⚔\n"
 
         self._embed.add_field(name='Топ 3', value='героя', inline=True)
