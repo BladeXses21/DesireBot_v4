@@ -20,12 +20,13 @@ class HeroSystem(DatabaseSystem):
                     max_health=NEW_HERO_START_HEALTH, attack_dmg=NEW_HERO_START_ATTACK)
 
         self.event_hero_collection.insert_one({
-            'id': hero.get_id(),
+            'id': hero.id,
             'name': hero.name,
             'current_health': self.health_to_time(hero.current_health, hero.max_health),
             'max_health': hero.max_health,
             'attack_dmg': hero.attack_dmg,
-            'inventory': hero.inventory.dict()
+            'inventory': hero.inventory.dict(),
+            'respawn_time': hero.respawn_time
         })
         return hero
 
@@ -40,17 +41,30 @@ class HeroSystem(DatabaseSystem):
         new_hero = hero_system.create_new_hero(user)
         return new_hero
 
+    def get_hero_by_id(self, id: int):
+        hero_data = self.event_hero_collection.find_one({'id': id}, {})
+
+        # if user exist return him
+        if hero_data is not None:
+            hero_data['current_health'] = self.time_to_health(hero_data['current_health'], hero_data['max_health'])
+            return Hero.parse_obj(hero_data)
+
+        print(f"Hero with id = {id} doesnt exist ")
+        return None
+
     def name_by_id(self, user_id: int) -> str:
         return self.event_hero_collection.find_one({'id': user_id}, {'name': 1})['name']
 
     def health_change(self, hero: Hero):
-        self.event_hero_collection.update_one({'id': hero.get_id()},
+        self.event_hero_collection.update_one({'id': hero.id},
                                               {"$set": {'current_health': self.health_to_time(hero.current_health
-                                                                                              , hero.max_health)}})
+                                                                                              , hero.max_health),
+                                                        'respawn_time': hero.respawn_time}
+                                               })
         return True
 
     def modify_inventory(self, hero: Hero):
-        self.event_hero_collection.update_one({'id': hero.get_id()},
+        self.event_hero_collection.update_one({'id': hero.id},
                                               {"$set": {'inventory': hero.inventory.dict()}})
         return True
 

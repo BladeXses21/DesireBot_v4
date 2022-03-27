@@ -25,6 +25,7 @@ class BattleView(object):
             if i > 3:
                 break
             hero_stat = sorted_stats.pop()
+
             if hero_stat is not None:
                 self._embed.add_field(name=f'🥇 {hero_system.name_by_id(hero_stat.hero_id)}',
                                       value=f'{hero_stat.dmg_dealt} ⚔', inline=True)
