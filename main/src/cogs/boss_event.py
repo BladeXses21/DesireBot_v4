@@ -14,6 +14,7 @@ from embeds.boss_event.boss_embed import BossView
 from cogs.base import BaseCog
 from embeds.boss_event.hero_embed import HeroStatsView
 from embeds.boss_event.hit_embed import HitView
+from main import client
 from systems.boss_event_system.battle_system import battle_system
 from systems.boss_event_system.boss_system import boss_system
 from systems.boss_event_system.hero_system import hero_system
@@ -51,26 +52,16 @@ class BossBattle(BaseCog):
         view.add_item(button_attack)
         view.add_item(button_stats)
         battle = battle_system.get_current_battle()
-        boss_embed = await interaction.response.send_message(embed=BattleView(battle, interaction.user).embed, view=view, ephemeral=True)
+        boss_embed = await interaction.response.send_message(embed=BattleView(battle, interaction.user).embed,
+                                                             view=view, ephemeral=True)
 
         async def attack_callback(interact: discord.Interaction):
-            if interact.user != interaction.user:
-                return await interact.response.send_message(embed=DefaultEmbed('***```Команду визвав не ти.```***'), ephemeral=True)
-            hero = hero_system.get_hero_by_user(interact.user)
+            ctx = await client.get_context(interact.message)
+            await self.attack_enemy(ctx=ctx, interaction=interact)
 
-            battle.fight_with(hero)
-
-            battle_system.record_dealt_dmg(battle)
-            hero_system.health_change(hero)
-
-            return await interact.response.send_message(embed=HitView(hero).embed, ephemeral=True)
-
-        async def stats_callback(inter: discord.Interaction):
-            if inter.user.id != interaction.user.id:
-                return await inter.response.send_message(embed=DefaultEmbed('***```Команду визвав не ти.```***'), ephemeral=True)
-
-            hero = hero_system.get_hero_by_user(interaction.user)
-            return await inter.response.send_message(embed=HeroStatsView(hero).embed, ephemeral=True)
+        async def stats_callback(interact: discord.Interaction):
+            ctx = await client.get_context(interact.message)
+            await self.my_stats(ctx=ctx, interaction=interact)
 
         button_attack.callback = attack_callback
         button_stats.callback = stats_callback
@@ -84,6 +75,7 @@ class BossBattle(BaseCog):
     async def attack_enemy(self, interaction: discord.Interaction):
         hero = hero_system.get_hero_by_user(interaction.user)
         if hero.is_dead():
+            # todo create better embed for displaying dead hero
             await interaction.response.send_message(embed=DefaultEmbed(f'***```You cant attack being dead !!!```***'))
             return
 
