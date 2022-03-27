@@ -28,7 +28,7 @@ class BossSystem(DatabaseSystem):
         return Enemy.parse_obj(enemy_data)
 
     def modify_inventory(self, enemy: Enemy):
-        self.event_hero_collection.update_one({'name': enemy.name},
+        self.event_boss_collection.update_one({'name': enemy.name},
                                               {"$set": {'inventory': enemy.inventory.dict()}})
         return True
 

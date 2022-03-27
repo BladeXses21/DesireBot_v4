@@ -13,7 +13,7 @@ class BossDropView(object):
         items_string = ''
         for i in range(0, inventory.items.__len__()):
             items_string = f"{items_string}\n{i+1}. {inventory.items.__getitem__(i).name}"
-        self._embed.description = f"`{items_string}`"
+        self._embed.description = f"{items_string}"
 
     @property
     def embed(self):

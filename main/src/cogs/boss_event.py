@@ -38,9 +38,9 @@ class BossBattle(BaseCog):
     async def start(self, interaction: discord.Interaction):
         boss = boss_system.get_random_boss()
 
-        battle_system.start_battle(boss)
+        battle = battle_system.start_new_battle(boss)
         # Todo create embed for battle info/ instead of boss view
-        await interaction.response.send_message(embed=BossView(battle_system.get_current_battle().enemy).embed)
+        await interaction.response.send_message(embed=BattleView(battle, interaction.user).embed)
 
     @slash_command(name='boss', description='Start Boss Embed', guild_ids=[ClANS_GUILD_ID])
     async def boss(self, interaction: discord.Interaction):
@@ -83,15 +83,34 @@ class BossBattle(BaseCog):
     @slash_command(name='attack_enemy', description='Attack enemy', guild_ids=[ClANS_GUILD_ID])
     async def attack_enemy(self, interaction: discord.Interaction):
         hero = hero_system.get_hero_by_user(interaction.user)
+        if hero.is_dead():
+            await interaction.response.send_message(embed=DefaultEmbed(f'***```You cant attack being dead !!!```***'))
+            return
+
         battle = battle_system.get_current_battle()
+
+        if battle.is_over():
+            boss = boss_system.get_random_boss()
+            battle = battle_system.start_new_battle(boss)
+
+            # todo embed for boss spawn
+            await interaction.channel.send(
+                embed=DefaultEmbed(f'***```Boss {boss.name} was born in hell to destroy the world!```***'))
+            await interaction.channel.send(embed=BattleView(battle, interaction.user).embed)
 
         battle.fight_with(hero)
 
-        battle_system.record_dealt_dmg(battle)
+        battle_system.update_current_battle(battle)
         hero_system.health_change(hero)
+        await interaction.response.send_message(embed=HitView(hero).embed, ephemeral=True)
+
+        if battle.is_over():
+            # todo embed for epic boss dead
+            await interaction.channel.send(embed=DefaultEmbed(f'***```Boss is dead!!!```***'))
+
+            return
 
         await interaction.channel.send(embed=BossView(battle.enemy).embed)
-        await interaction.response.send_message(embed=HitView(hero).embed, ephemeral=True)
 
     @slash_command(name='stats', description='Show user stats in boss event', guild_ids=[ClANS_GUILD_ID])
     async def my_stats(self, interaction: discord.Interaction):
@@ -149,13 +168,30 @@ class BossBattle(BaseCog):
         hero_system.modify_inventory(hero)
         await interaction.response.send_message(embed=HeroInventoryView(hero).embed)
 
-    @slash_command(name='add_boss_drop_item', description='', guild_ids=[ClANS_GUILD_ID])
-    async def add_boss_drop_item(self, interaction: discord.Interaction, boss_name: str, item_name: str):
+    @slash_command(name='add_boss_drop', description='add item drop for boss', guild_ids=[ClANS_GUILD_ID])
+    async def add_boss_drop(self, interaction: discord.Interaction, boss_name: str, item_name: str):
         boss = boss_system.get_by_name(boss_name)
         inventory = boss.inventory
-        inventory.add_item(items_system.find_by_name(item_name))
+        item = items_system.find_by_name(item_name)
+        if item is None:
+            await interaction.response.send_message(embed=DefaultEmbed("```Item doesnt exist```"))
+            return
+        inventory.add_item(item)
 
         boss_system.modify_inventory(boss)
+        await interaction.response.send_message(embed=BossDropView(boss).embed)
+
+    @slash_command(name='remove_boss_drop', description='remove item drop from boss', guild_ids=[ClANS_GUILD_ID])
+    async def remove_boss_drop(self, interaction: discord.Interaction, boss_name: str, item_index: int):
+        boss = boss_system.get_by_name(boss_name)
+        boss.inventory.remove_item(item_index)
+
+        boss_system.modify_inventory(boss)
+        await interaction.response.send_message(embed=BossDropView(boss).embed)
+
+    @slash_command(name='see_boss_inventory', description='show boss inventory', guild_ids=[ClANS_GUILD_ID])
+    async def see_boss_inventory(self, interaction: discord.Interaction, boss_name: str):
+        boss = boss_system.get_by_name(boss_name)
         await interaction.response.send_message(embed=BossDropView(boss).embed)
 
 
