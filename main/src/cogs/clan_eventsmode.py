@@ -29,9 +29,9 @@ def wasting_time_in_seconds(message_id: int):
 class EventsMode(BaseCog):
     def __init__(self, client):
         super().__init__(client)
+        print("Cog 'clan event' connected!")
         self.guild = None
         self.log_chat = None
-        self.client = client
         self.clan_event_chat = None
         self.clan_control_role = None
 
@@ -183,6 +183,5 @@ class EventsMode(BaseCog):
         return await ctx.send(embed=DefaultEmbed(f'{description}'))
 
 
-def setup(client):
-    client.add_cog(EventsMode(client))
-    print("Cog 'clan event' connected!")
+def setup(bot):
+    bot.add_cog(EventsMode(bot))

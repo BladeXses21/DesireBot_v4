@@ -1,3 +1,4 @@
+from discord import Bot
 from discord.ext import commands
 import discord
 from discord.commands import CommandPermission, SlashCommandGroup
@@ -9,7 +10,7 @@ from systems.money_system import money_system
 class MoneyCog(BaseCog):
     def __init__(self, client):
         super().__init__(client)
-        self.client = client
+        print("Cog 'money' connected!")
         self.guild = None
 
 
@@ -42,6 +43,5 @@ class MoneyCog(BaseCog):
     #     return
 
 
-def setup(client):
-    client.add_cog(MoneyCog(client))
-    print("Cog 'money' connected!")
+def setup(bot : Bot):
+    bot.add_cog(MoneyCog(bot))

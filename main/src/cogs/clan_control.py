@@ -32,8 +32,8 @@ def end_work(member_id: int):
 class ClanControl(BaseCog):
     def __init__(self, client):
         super().__init__(client)
+        print("Cog 'clan control' connected!")
         self.log_chat = None
-        self.client = client
         self.clan_control = None
         self.guild = None
         self.clan_chat = None
@@ -237,6 +237,5 @@ class ClanControl(BaseCog):
         drop_down_menu.callback = menu_callback
 
 
-def setup(client):
-    client.add_cog(ClanControl(client))
-    print("Cog 'clan control' connected!")
+def setup(bot):
+    bot.add_cog(ClanControl(bot))

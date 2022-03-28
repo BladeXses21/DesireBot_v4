@@ -12,6 +12,10 @@ class Battle(BaseModel):
     stats: List[BattleStat] = []
 
     def fight_with(self, hero: Hero):
+        if self.enemy.is_dead() or hero.is_dead():
+            print("Enemy or hero is dead so fight cancelled")
+            return False
+
         # deal dmg between boss and hero
         self.enemy.take_dmg(hero.get_dmg())
         hero.take_dmg(self.enemy.attack_dmg)

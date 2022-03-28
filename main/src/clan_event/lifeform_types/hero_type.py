@@ -20,3 +20,7 @@ class Hero(LifeForm):
 
     def is_dead(self):
         return self.respawn_time > time.time()
+
+    def full_regen(self):
+        self.current_health = self.max_health
+        self.respawn_time = 0

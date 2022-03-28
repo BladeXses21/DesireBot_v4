@@ -1,3 +1,5 @@
+import time
+
 from clan_event.lifeform_types.enemy_type import Enemy
 from discord import Embed, Colour
 
@@ -9,6 +11,8 @@ class HeroStatsView(object):
         self._embed = Embed(title=f'{hero.name} stats: ', color=Colour(0x292b2f))
         self._embed.add_field(name='Health', value=hero.current_health)
         self._embed.add_field(name='Weapon Power', value=hero.attack_dmg)
+        if hero.is_dead():
+            self._embed.add_field(name='Resurrection after', value=f"{int((hero.respawn_time - time.time()) / 3600)} hours")
 
     @property
     def embed(self):
