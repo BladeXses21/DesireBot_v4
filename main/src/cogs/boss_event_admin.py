@@ -33,9 +33,10 @@ class BossGameAdmin(BaseCog):
     @slash_command(name='start', description='Start Boss Embed', guild_ids=[ClANS_GUILD_ID])
     async def start(self, interaction: Interaction):
         boss = boss_system.get_random_boss()
-
-        battle = battle_system.start_new_battle(boss)
-        await interaction.response.send_message(embed=BattleView(battle, interaction.user).embed)
+        battle_system.start_new_battle(boss)
+        #     todo event start embed
+        await interaction.response.send_message(
+            embed=DefaultEmbed(description=f'***```Boss {boss.name} was born in hell to destroy the world!```***'))
 
     @slash_command(name='create_enemy', description='Start Boss Embed', guild_ids=[ClANS_GUILD_ID])
     async def create_enemy(self, interaction: Interaction, name: str, health: int, attack_dmg: int, image: str):

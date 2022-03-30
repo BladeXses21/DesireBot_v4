@@ -10,6 +10,8 @@ dnspython = "*"
 typing = "*"
 typing-extensions = "*"
 pydantic = "*"
+requests = "*"
+wget = "*"
 
 [dev-packages]
 
