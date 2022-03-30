@@ -7,3 +7,8 @@ class Enemy(LifeForm):
     attack_dmg: int
     inventory: EnemyInventory = EnemyInventory()
 
+    def take_dmg(self, dmg: int):
+        super().take_dmg(dmg)
+
+        if self.current_health <= 0:
+            self.current_health = 0

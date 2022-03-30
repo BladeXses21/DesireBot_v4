@@ -14,6 +14,13 @@ class Hero(LifeForm):
     def get_dmg(self):
         return self.attack_dmg
 
+    def take_dmg(self, dmg: int):
+        super().take_dmg(dmg)
+
+        if self.current_health <= 0:
+            self.current_health = 0
+            self.die()
+
     def die(self):
         self.respawn_time = int(time.time() + (3600 * HERO_RES_TIME))
         print(f"{self.respawn_time}")

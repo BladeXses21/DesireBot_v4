@@ -1,5 +1,5 @@
 import discord
-from discord import Option, Interaction, Bot
+from discord import Option, Interaction, Bot, Embed
 from discord.commands import slash_command
 from discord.ui import Button, View
 from discord.ext import commands
@@ -15,14 +15,7 @@ from cogs.base import BaseCog
 from embeds.boss_event.hero_embed import HeroStatsView
 from embeds.boss_event.hit_embed import HitView
 from systems.boss_event_system.battle_system import battle_system
-from systems.boss_event_system.boss_system import boss_system
 from systems.boss_event_system.hero_system import hero_system
-from systems.boss_event_system.items_system import items_system
-
-
-async def default_respond(interaction):
-    if not interaction.response.is_done():
-        interaction.response.pong()
 
 
 class BossGamePlayer(BaseCog):
@@ -37,49 +30,51 @@ class BossGamePlayer(BaseCog):
         button_stats = Button(style=discord.ButtonStyle.red, label='Stats', emoji='💎')
         button_boss = Button(style=discord.ButtonStyle.blurple, label='Boss Info', emoji='ℹ')
 
-        view = discord.ui.View()
+        # fight_view = View(*[button_attack, button_inventory, button_stats])
+        fight_view = View()
+        other_view = View()
 
-        view.add_item(button_stats)
-        view.add_item(button_inventory)
-        view.add_item(button_attack)
+        fight_view.add_item(button_attack)
+        fight_view.add_item(button_inventory)
+        fight_view.add_item(button_stats)
+
+        other_view.add_item(button_boss)
+        other_view.add_item(button_inventory)
+        other_view.add_item(button_stats)
+
+        battle = battle_system.get_current_battle()
+
+        if battle.is_over():
+            button_attack.disabled = True
 
         async def attack_callback(interact: Interaction):
             ctx = await self.client.get_application_context(interact)
-            await interact.message.edit(view=view)
+            if battle.is_over():
+                button_attack.disabled = True
+            await interact.message.edit(view=fight_view)
             await self.attack_enemy(ctx=ctx, interaction=interact)
 
         async def stats_callback(interact: Interaction):
             ctx = await self.client.get_application_context(interact)
-            view.remove_item(button_boss)
-            view.remove_item(button_attack)
-            view.add_item(button_boss)
-            await interact.message.edit(view=view)
+            await interact.message.edit(view=other_view)
             await self.my_stats(ctx=ctx, interaction=interact)
 
         async def inventory_callback(interact: Interaction):
             ctx = await self.client.get_application_context(interact)
-            view.remove_item(button_boss)
-            view.remove_item(button_attack)
-            view.add_item(button_boss)
-            await interact.message.edit(view=view)
+            await interact.message.edit(view=other_view)
             await self.inventory(ctx=ctx, interaction=interact)
 
         async def boss_info_callback(interact: Interaction):
-            view.remove_item(button_boss)
-            view.add_item(button_attack)
-            await interact.message.edit(view=view)
             await interact.response.edit_message(
-                embed=BattleView(battle_system.get_current_battle(), interaction.user).embed)
+                embed=BattleView(battle_system.get_current_battle(), interaction.user).embed, view=fight_view)
 
         button_attack.callback = attack_callback
         button_stats.callback = stats_callback
         button_inventory.callback = inventory_callback
         button_boss.callback = boss_info_callback
 
-        battle = battle_system.get_current_battle()
-
         await interaction.response.send_message(embed=BattleView(battle, interaction.user).embed,
-                                                view=view)
+                                                view=fight_view)
 
     @slash_command(name='attack_enemy', description='Attack enemy', guild_ids=[ClANS_GUILD_ID])
     async def attack_enemy(self, interaction: Interaction):
@@ -87,43 +82,43 @@ class BossGamePlayer(BaseCog):
         if hero.is_dead():
             # todo create better embed for displaying dead hero
             await interaction.response.send_message(embed=DefaultEmbed(f'***```You cant attack being dead !!!```***'),
-                                                    delete_after=3)
+                                                    delete_after=3,
+                                                    ephemeral=True)
             return
 
         battle = battle_system.get_current_battle()
 
-        if battle.is_over():
-            boss = boss_system.get_random_boss()
-            battle = battle_system.start_new_battle(boss)
-
-            # todo embed for boss spawn
-            await interaction.channel.send(
-                embed=DefaultEmbed(f'***```Boss {boss.name} was born in hell to destroy the world!```***'))
-
-        battle.fight_with(hero)
+        if not battle.fight_with(hero):
+            await interaction.response.send_message(embed=DefaultEmbed(description="***```Boss already dead```***"),
+                                                    ephemeral=True)
+            return
 
         battle_system.update_current_battle(battle)
         hero_system.health_change(hero)
-        await interaction.channel.send(embed=HitView(hero).embed, delete_after=5)
 
-        if battle.is_over():
-            # todo embed for epic boss dead
-            await interaction.channel.send(embed=DefaultEmbed(f'***Boss `{battle.enemy.name}` is dead!!!***'))
-            return
+        await interaction.channel.send(embed=HitView(hero).embed, delete_after=4)
 
-        await interaction.response.edit_message(embed=BattleView(battle, interaction.user).embed)
-
-        await default_respond(interaction)
+        if interaction.message.components is not None:
+            await interaction.response.edit_message(embed=BattleView(battle, interaction.user).embed)
+        else:
+            await interaction.response.send_message(embed=BattleView(battle, interaction.user).embed, ephemeral=True)
 
     @slash_command(name='stats', description='Show user stats in boss event', guild_ids=[ClANS_GUILD_ID])
     async def my_stats(self, interaction: discord.Interaction):
         hero = hero_system.get_hero_by_user(interaction.user)
-        await interaction.response.edit_message(embed=HeroStatsView(hero).embed)
+
+        if interaction.message.components is not None:
+            await interaction.response.edit_message(embed=HeroStatsView(hero).embed)
+        else:
+            await interaction.response.send_message(embed=HeroStatsView(hero).embed, ephemeral=True)
 
     @slash_command(name='inventory', description='Show your inventory', guild_ids=[ClANS_GUILD_ID])
     async def inventory(self, interaction: discord.Interaction):
         hero = hero_system.get_hero_by_user(interaction.user)
-        await interaction.response.edit_message(embed=HeroInventoryView(hero).embed)
+        if interaction.message.components is not None:
+            await interaction.response.edit_message(embed=HeroInventoryView(hero).embed)
+        else:
+            await interaction.response.send_message(embed=HeroInventoryView(hero).embed, ephemeral=True)
 
     @slash_command(name='equip_item', description='equip item from your inventory', guild_ids=[ClANS_GUILD_ID])
     async def equip_item(self, interaction: discord.Interaction, item_index: int):
