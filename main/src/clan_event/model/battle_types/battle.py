@@ -1,30 +1,29 @@
 from pydantic import BaseModel
 from typing import List
 
-from clan_event.battle_types.battle_stats import BattleStat
-from clan_event.lifeform_types.enemy_type import Enemy
-from clan_event.lifeform_types.hero_type import Hero
+from clan_event.model.battle_types.dmg_record import DmgRecord
+from clan_event.model.lifeform_types.enemy_type import Enemy
+from clan_event.model.lifeform_types.hero_type import Hero
 from systems.boss_event_system.hero_system import hero_system
 
 
 class Battle(BaseModel):
     enemy: Enemy
-    stats: List[BattleStat] = []
+    stats: List[DmgRecord] = []
 
     def fight_with(self, hero: Hero):
+        if self.enemy.is_dead() or hero.is_dead():
+            print("Enemy or hero is dead so fight cancelled")
+            return False
+
         # deal dmg between boss and hero
         self.enemy.take_dmg(hero.get_dmg())
         hero.take_dmg(self.enemy.attack_dmg)
 
-        if hero.current_health <= 0:
-            hero.die()
+        self.record_dealt_dmg(hero.id, hero.get_dmg())
 
-        for battle_stat in self.stats:
-            if battle_stat.hero_id == hero.id:
-                battle_stat.record_dmg(hero.get_dmg())
-                return True
-
-        self.stats.append(BattleStat(hero_id=hero.id, dmg_dealt=hero.get_dmg()))
+        if self.enemy.is_dead():
+            self.drop_items()
         return True
 
     def is_over(self):
@@ -39,6 +38,17 @@ class Battle(BaseModel):
             hero = hero_system.get_hero_by_id(stat.hero_id)
             hero.inventory.add_item(self.enemy.inventory.random_item())
             hero_system.modify_inventory(hero)
+
+    def record_dealt_dmg(self, hero_id: int, dmg: int):
+        dmg_record = None
+        for record in self.stats:
+            if record.hero_id == hero_id:
+                dmg_record = record
+
+        if dmg_record is not None:
+            dmg_record.record_dmg(dmg)
+        else:
+            self.stats.append(DmgRecord(hero_id=hero_id, dmg_dealt=dmg))
 
     def get_hero_dealt_dmg(self, user_id: int):
         for battle_stat in self.stats:

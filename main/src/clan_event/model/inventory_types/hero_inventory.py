@@ -1,6 +1,6 @@
-from clan_event.inventory_types.equipped_inventory import EquippedInventory
-from clan_event.inventory_types.inventory_type import Inventory
-from clan_event.inventory_types.item_type import Item
+from clan_event.model.inventory_types.equipped_inventory import EquippedInventory
+from clan_event.model.inventory_types.inventory_type import Inventory
+from clan_event.model.inventory_types.item_type import Item
 
 
 class HeroInventory(Inventory):

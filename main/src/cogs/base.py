@@ -2,12 +2,10 @@ from discord import Cog, Bot
 
 
 class BaseCog(Cog):
-
-    def __init__(self, bot: Bot):
-        self.bot = bot
+    def __init__(self, client: Bot):
+        self.client = client
         self.guild = None
 
 
-def setup(client):
-    client.add_cog(BaseCog(client))
-    print("Cog 'base' connected!")
+def setup(bot):
+    bot.add_cog(BaseCog(bot))

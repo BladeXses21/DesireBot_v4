@@ -1,7 +1,7 @@
 from typing import List
 
 from systems.database_system import DatabaseSystem
-from clan_event.inventory_types.item_type import Item
+from clan_event.model.inventory_types.item_type import Item
 
 
 class ItemsSystem(DatabaseSystem):

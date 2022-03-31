@@ -1,11 +1,10 @@
-from clan_event.lifeform_types.enemy_type import Enemy
 from discord import Embed, Colour
 
-from clan_event.lifeform_types.hero_type import Hero
+from clan_event.model.lifeform_types.hero_type import Hero
 
 
-class HeroInventoryView(object):
-    def __init__(self, hero: Hero):
+class HeroInventoryEmbed(object):
+    def __init__(self, hero: Hero, selected: int = 1):
         self._embed = Embed(title=f'{hero.name} inventory: ', color=Colour(0x292b2f))
         inventory = hero.inventory
         equipped = inventory.equipped
@@ -26,7 +25,11 @@ class HeroInventoryView(object):
 
         i = 1
         for item in inventory.items:
-            items_string = f"{items_string}\n{i}. {item.name}"
+            if i == selected:
+                print("printed selected item")
+                items_string = f'{items_string}\n ✔ {i}. {item.name}'
+            else:
+                items_string = f"{items_string}\n{i}. {item.name}"
             i = i + 1
         self._embed.description = f"`{items_string}`"
 

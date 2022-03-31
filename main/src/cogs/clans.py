@@ -2,7 +2,7 @@ import time
 import urllib.request
 
 import discord
-from discord import Colour, Embed
+from discord import Colour, Embed, Bot
 from discord.ext import commands
 from discord.utils import get
 from discord.commands import Option, slash_command
@@ -38,7 +38,7 @@ class ClansCog(BaseCog):
 
     def __init__(self, client):
         super().__init__(client)
-        self.client = client
+        print("Cog 'clans' connected!")
         self.clans_voice_category = None
         self.clans_text_category = None
         self.leader_role = None
@@ -368,6 +368,5 @@ class ClansCog(BaseCog):
         return await ctx.respond(embed=DefaultEmbed(f'***```{author.name}, вы приобрели {how} слотов для клана.```***'))
 
 
-def setup(client):
-    client.add_cog(ClansCog(client))
-    print("Cog 'clans' connected!")
+def setup(bot : Bot):
+    bot.add_cog(ClansCog(bot))

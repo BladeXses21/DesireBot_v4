@@ -1,16 +1,11 @@
 import time
-import json
 from collections import namedtuple
 from types import SimpleNamespace
 
 from discord import User
 
-from clan_event.inventory_types.equipped_inventory import EquippedInventory
-from clan_event.inventory_types.hero_inventory import HeroInventory
-from clan_event.inventory_types.inventory_type import Inventory
-from clan_event.inventory_types.item_type import Item, EnumItemTypes
 from config import NEW_HERO_START_ATTACK, NEW_HERO_START_HEALTH
-from clan_event.lifeform_types.hero_type import Hero
+from clan_event.model.lifeform_types.hero_type import Hero
 from systems.database_system import DatabaseSystem
 
 

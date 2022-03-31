@@ -1,7 +1,7 @@
 import pymongo
 
-from clan_event.battle_types.battle import Battle
-from clan_event.lifeform_types.enemy_type import Enemy
+from clan_event.model.battle_types.battle import Battle
+from clan_event.model.lifeform_types.enemy_type import Enemy
 from systems.database_system import DatabaseSystem
 
 

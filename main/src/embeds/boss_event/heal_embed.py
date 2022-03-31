@@ -1,10 +1,9 @@
-from clan_event.lifeform_types.enemy_type import Enemy
 from discord import Embed, Colour
 
-from clan_event.lifeform_types.hero_type import Hero
+from clan_event.model.lifeform_types.hero_type import Hero
 
 
-class HealView:
+class HealEmbed:
     def __init__(self, hero: Hero):
         self._embed = Embed(title=f'***```{hero.name} was healed to full. His now have {hero.current_health} life```***',
                             color=Colour(0x292b2f))

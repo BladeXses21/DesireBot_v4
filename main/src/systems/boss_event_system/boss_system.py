@@ -1,8 +1,8 @@
 import random
 
-from clan_event.inventory_types.enemy_inventory import EnemyInventory
+from clan_event.model.inventory_types.enemy_inventory import EnemyInventory
 from systems.database_system import DatabaseSystem
-from clan_event.lifeform_types.enemy_type import Enemy
+from clan_event.model.lifeform_types.enemy_type import Enemy
 
 
 class BossSystem(DatabaseSystem):
