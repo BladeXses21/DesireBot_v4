@@ -22,12 +22,10 @@ class GameService:
 
         battle = battle_system.get_current_battle()
 
-        if battle.is_over():
-            view_builder.button_attack.disabled = True
+        view_builder.button_attack.disabled = battle.is_over()
 
         async def attack_callback(interact: Interaction):
-            if battle.is_over():
-                view_builder.button_attack.disabled = True
+            view_builder.button_attack.disabled = battle.is_over()
             await self.attack_enemy(interact, ctx)
 
         async def profile_callback(interact: Interaction):
@@ -65,24 +63,27 @@ class GameService:
         else:
             await interaction.response.edit_message(embed=HeroStatsEmbed(hero).embed, view=profile_view)
 
-    async def inventory(self, interaction: Interaction, ctx: ApplicationContext = None):
+    async def inventory(self, interaction: Interaction, ctx: ApplicationContext = None, index: int = 1):
         inventory_view = view_builder.inventory_view()
         if ctx is None:
             ctx = await self.client.get_application_context(interaction)
 
         hero = hero_system.get_hero_by_user(ctx.user)
+        inventory = hero.inventory
+
+        selected = len(inventory.items) if index < 1 else 1 if index > len(inventory.items) else index
 
         async def back_callback(interact: Interaction):
             await self.profile(interact, ctx)
 
         async def up_callback(interact: Interaction):
-            await self.inventory(interact, ctx)
+            await self.inventory(interact, ctx, selected - 1)
 
         async def down_callback(interact: Interaction):
-            await self.inventory(interact, ctx)
+            await self.inventory(interact, ctx, selected + 1)
 
         async def equip_callback(interact: Interaction):
-            await self.equip(interact, ctx, 1)
+            await self.equip(interact, ctx, selected)
 
         view_builder.button_back.callback = back_callback
         view_builder.up_inventory_btn.callback = up_callback
@@ -91,9 +92,11 @@ class GameService:
 
         # todo change 1 on real id of selected item
         if interaction.message is None:
-            await interaction.response.send_message(embed=HeroInventoryEmbed(hero, 1).embed, view=inventory_view)
+            await interaction.response.send_message(embed=HeroInventoryEmbed(hero, selected).embed,
+                                                    view=inventory_view)
         else:
-            await interaction.response.edit_message(embed=HeroInventoryEmbed(hero, 1).embed, view=inventory_view)
+            await interaction.response.edit_message(embed=HeroInventoryEmbed(hero, selected).embed,
+                                                    view=inventory_view)
 
     async def attack_enemy(self, interaction: Interaction, ctx: ApplicationContext = None):
         if ctx is None:
@@ -141,4 +144,3 @@ class GameService:
             await interaction.response.send_message(embed=HeroInventoryEmbed(hero, index).embed)
         else:
             await interaction.response.edit_message(embed=HeroInventoryEmbed(hero, index).embed)
-

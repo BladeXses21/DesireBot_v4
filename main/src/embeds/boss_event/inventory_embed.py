@@ -27,11 +27,11 @@ class HeroInventoryEmbed(object):
         for item in inventory.items:
             if i == selected:
                 print("printed selected item")
-                items_string = f'{items_string}\n ✔ {i}. {item.name}'
+                items_string = f'{items_string}\n <:arrow:959084748796465222> {i}. {item.name}'
             else:
                 items_string = f"{items_string}\n{i}. {item.name}"
             i = i + 1
-        self._embed.description = f"`{items_string}`"
+        self._embed.description = f"{items_string}"
 
     @property
     def embed(self):

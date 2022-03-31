@@ -11,8 +11,8 @@ class ViewBuilder:
         self.button_stats = Button(style=discord.ButtonStyle.secondary, label='Stats', emoji='💎')
         self.button_back = Button(style=discord.ButtonStyle.red, label='Back', emoji='ℹ')
 
-        self.up_inventory_btn = Button(style=discord.ButtonStyle.secondary, label=':arrow_up:', emoji='⬆')
-        self.down_inventory_btn = Button(style=discord.ButtonStyle.secondary, label=':arrow_down:', emoji='⬇')
+        self.up_inventory_btn = Button(style=discord.ButtonStyle.secondary, label='', emoji='⬆')
+        self.down_inventory_btn = Button(style=discord.ButtonStyle.secondary, label='', emoji='⬇')
         self.equip_btn = Button(style=discord.ButtonStyle.green, label='Equip')
 
     def fight_view(self) -> View:
