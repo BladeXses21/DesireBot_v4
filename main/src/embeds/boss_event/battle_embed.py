@@ -18,7 +18,7 @@ class BattleView(object):
                                   f"{'<:heart_purples:956343794595426304>' * number_of_hearts}\n\n" \
                                   f"**Ти наніс -**  {battle.get_hero_dealt_dmg(user.id)} ⚔\n"
 
-        self._embed.add_field(name='Топ 3', value='героя', inline=True)
+        self._embed.add_field(name='Топ 3', value='```Герої```', inline=True)
 
         sorted_stats = sorted(battle.stats, key=lambda x: x.dmg_dealt, reverse=True)
         for i in range(0, sorted_stats.__len__()):

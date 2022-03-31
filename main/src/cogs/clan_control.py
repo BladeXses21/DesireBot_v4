@@ -4,15 +4,16 @@ from datetime import date
 
 import discord
 from discord import Embed
-from discord.commands import permissions, slash_command, Option
+from discord.commands import permissions, slash_command
 from discord.ext import commands, tasks
 from discord.ui import Button
 from discord.ui import Select
 
 from cogs.base import BaseCog
-from config import CLANS_ROLES, ClANS_GUILD_ID, BladeXses, PREFIX, Less, LOG_CHAT, SCRIPT_CHAT, CURATOR_ROLE
+from config import CLANS_ROLES, ClANS_GUILD_ID, BladeXses, PREFIX, Less, LOG_CHAT, CURATOR_ROLE, \
+    CLANS_CONTROL_CHAT
 from embeds.def_embed import DefaultEmbed
-from systems.control_system import control_system
+from systems.clan_staff.control_system import control_system
 
 desire_bot = commands.Bot(command_prefix=PREFIX, intents=discord.Intents.all())
 
@@ -46,7 +47,7 @@ class ClanControl(BaseCog):
     async def on_ready(self):
         self.guild = self.client.get_guild(ClANS_GUILD_ID)
 
-        self.clan_chat = self.client.get_channel(SCRIPT_CHAT)
+        self.clan_chat = self.client.get_channel(CLANS_CONTROL_CHAT)
         self.log_chat = self.client.get_channel(LOG_CHAT)
 
         if not self.clan_chat:
@@ -97,7 +98,7 @@ class ClanControl(BaseCog):
                 return await ctx.response.send_message(embed=DefaultEmbed('***```Уви, но ти не клан контрол```***'), ephemeral=True)
 
             try:
-                if time_converter(server_name="Tenderly") >= '00:30':
+                if time_converter(server_name="Tenderly") >= '15:00':
                     control_system.remove_time_old_check(server_name='Tenderly')
                     return await ctx.response.send_message(embed=DefaultEmbed('***```Вы опоздали, берите следующую проверку!```***'), ephemeral=True)
             except TypeError:
@@ -148,32 +149,40 @@ class ClanControl(BaseCog):
     @commands.command(name='cc_add')
     @commands.has_role(item=CURATOR_ROLE)
     async def cc_add(self, ctx, member: discord.Member):
-        check_member_for_a_base = control_system.find_clan_control_on_base(member_id=member.id)
+        author = ctx.author.id
 
-        if member is ctx.author:
-            return await ctx.send(embed=DefaultEmbed(f'***```Нельзя использовать на себя.```***'))
-        if member.id == check_member_for_a_base:
-            return await ctx.send(embed=DefaultEmbed(f'***```{member.name} вже є клан контролом```***'))
+        match author:
+            case 450361269128790026 | 714988384325730306 | 450361269128790026 as author:
+                check_member_for_a_base = control_system.find_clan_control_on_base(member_id=member.id)
 
-        control_system.add_new_clan_control(member_id=member.id, control_role=CLANS_ROLES['CLAN_CONTROL_ROLE_ID'],
-                                            add_time=int(time.time()))
-        control_system.add_week_day_clan_control(member_id=member.id, control_role=CLANS_ROLES['CLAN_CONTROL_ROLE_ID'],
-                                                 member_name=member.name)
-        return await ctx.send(embed=DefaultEmbed(f'***```{member.name} був прийнятий на клан контрола```***'))
+                if member is ctx.author:
+                    return await ctx.send(embed=DefaultEmbed(f'***```Нельзя использовать на себя.```***'))
+                if member.id == check_member_for_a_base:
+                    return await ctx.send(embed=DefaultEmbed(f'***```{member.name} вже є клан контролом```***'))
+
+                control_system.add_new_clan_control(member_id=member.id, control_role=CLANS_ROLES['CLAN_CONTROL_ROLE_ID'],
+                                                    add_time=int(time.time()))
+                control_system.add_week_day_clan_control(member_id=member.id, control_role=CLANS_ROLES['CLAN_CONTROL_ROLE_ID'],
+                                                         member_name=member.name)
+                return await ctx.send(embed=DefaultEmbed(f'***```{member.name} був прийнятий на клан контрола```***'))
 
     @commands.command(name='cc_kick')
     @commands.has_role(item=CURATOR_ROLE)
     async def cc_kick(self, ctx, member: discord.Member):
+        author = ctx.author.id
 
-        check_member_for_a_base = control_system.find_clan_control_on_base(member_id=member.id)
+        match author:
+            case 450361269128790026 | 714988384325730306 | 450361269128790026 as author:
 
-        if member is ctx.author:
-            return await ctx.send(embed=DefaultEmbed(f'***```Нельзя использовать на себя.```***'))
-        if member.id != check_member_for_a_base:
-            return await ctx.send(embed=DefaultEmbed(f'***```{member.name} не клан контрол.```***'))
+                check_member_for_a_base = control_system.find_clan_control_on_base(member_id=member.id)
 
-        control_system.kick_clan_control(member_id=member.id)
-        return await ctx.send(embed=DefaultEmbed(f'***```{member.name} був знятий з клан контрола```***'))
+                if member is ctx.author:
+                    return await ctx.send(embed=DefaultEmbed(f'***```Нельзя использовать на себя.```***'))
+                if member.id != check_member_for_a_base:
+                    return await ctx.send(embed=DefaultEmbed(f'***```{member.name} не клан контрол.```***'))
+
+                control_system.kick_clan_control(member_id=member.id)
+                return await ctx.send(embed=DefaultEmbed(f'***```{member.name} був знятий з клан контрола```***'))
 
     @commands.command(name='cc_list')
     @commands.has_role(item=CLANS_ROLES['CLAN_CONTROL_ROLE_ID'])
@@ -232,7 +241,7 @@ class ClanControl(BaseCog):
             _week_embed.add_field(name='Нд:', value=seven, inline=True)
             _week_embed.set_footer(text=f'Всього:{str(all_day)}',
                                    icon_url='https://tenor.com/view/cute-cute-cat-cat-dance-dance-danse-gif-17603476')
-            await interaction.response.send_message(embed=_week_embed, view=view)
+            await interaction.response.edit_message(embed=_week_embed, view=view)
 
         drop_down_menu.callback = menu_callback
 

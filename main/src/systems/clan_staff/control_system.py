@@ -135,7 +135,7 @@ class ControlSystem(DatabaseSystem):
         return res['member_id'], res['1'], res['2'], res['3'], res['4'], res['5'], res['6'], res['7'], res['all_day']
 
     def find_all_clan_controllers_ids(self, control_role_id: int):
-        return self.clan_control_check_collection.find({'control_role_id': control_role_id}, {'member_id': 1, 'all_day': 1}).sort('all_day', -1)
+        return self.clan_control_check_collection.find({'control_role': control_role_id}, {'member_id': 1, 'all_day': 1}).sort('all_day', -1)
 
 
 control_system = ControlSystem()

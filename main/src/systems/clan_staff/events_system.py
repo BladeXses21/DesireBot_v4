@@ -37,16 +37,14 @@ class EventsModeSystem(DatabaseSystem):
         return res['works_with_request_id']
 
     # Проверка на то, находится ли ивентер сейчас на ивенте или нет
-    def find_clan_events_mode_is_working(self, member_id: int):
+    def find_clan_event_mode_is_working(self, member_id: int):
 
         res = self.clan_events_mode_collection.find_one({'member_id': member_id})
 
-        return res['member_check_work']
+        if res is None:
+            return False
 
-    # Получение данных об времени потрапченых на ивент
-    def event_pass(self, member_id: int, sum_wasting_time):
-        self.clan_events_mode_collection.update_one({'member_id': member_id}, {'$inc': {'all_sum_events_end': 1, 'sum_wasting_time': sum_wasting_time}})
-        return True
+        return res['member_check_work']
 
     # Удаление клан контрола с базы
     def remove_clan_events_mode(self, member_id: int):
@@ -63,7 +61,7 @@ class EventsModeSystem(DatabaseSystem):
     def accept_request(self, message_id: int, member_id: int):
         self.clan_events_collection.update_one({'message_id': message_id}, {'$set': {'time_accept_request': int(time.time())}})
         self.clan_events_mode_collection.update_one({'member_id': member_id}, {'$set': {'works_with_request_id': message_id}})
-        self.clan_events_mode_collection.update_one({'member_id': member_id}, {'set': {'member_check_work': True}})
+        self.clan_events_mode_collection.update_one({'member_id': member_id}, {'$set': {'member_check_work': True}})
         return True
 
     # достает всех ивентеров с базы для таблицы
@@ -72,7 +70,7 @@ class EventsModeSystem(DatabaseSystem):
                                                                                             'member_id': 1,
                                                                                             'all_sum_events_end': 1,
                                                                                             'sum_wasting_time': 1,
-                                                                                            'add_time': 1}).sort('sum_wasting_time', -1)
+                                                                                            'add_time': 1}).sort('all_sum_events_end', -1)
 
     # Создание запроса ивента
     def request_create(self, message_id: int, clan_name: str, event_name: str, member_id: int):
@@ -116,8 +114,8 @@ class EventsModeSystem(DatabaseSystem):
 
     # Добавление данных о проведенном ивенте в бд ивентера
     def adding_event_data_to_events_mode(self, member_id: int, waisting_time: int):
-        self.clan_events_mode_collection.update_one({"member_id": member_id}, {'$inc': {'event_num': 1}})
-        self.clan_events_mode_collection.update_one({"member_id": member_id}, {'$inc': {'waisting_time': waisting_time}})
+        self.clan_events_mode_collection.update_one({"member_id": member_id}, {'$inc': {'all_sum_events_end': 1}})
+        self.clan_events_mode_collection.update_one({"member_id": member_id}, {'$inc': {'sum_wasting_time': waisting_time}})
         return True
 
 
