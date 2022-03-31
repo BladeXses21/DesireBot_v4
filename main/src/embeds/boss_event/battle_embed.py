@@ -1,13 +1,13 @@
 from math import ceil
 
-from clan_event.battle_types.battle import Battle
+from clan_event.model.battle_types.battle import Battle
 from discord import Embed, Colour, User
 
-from clan_event.heart_bar.boss_heath_bar import BossHealthBarCreator
+from clan_event.model.heart_bar.boss_heath_bar import BossHealthBarCreator
 from systems.boss_event_system.hero_system import hero_system
 
 
-class BattleView(object):
+class BattleEmbed(object):
     def __init__(self, battle: Battle, user: User):
         self._embed = Embed(title='Кланова гра', color=Colour(0x9006d0))
         enemy = battle.enemy

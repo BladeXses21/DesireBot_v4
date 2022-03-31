@@ -2,13 +2,12 @@ import discord
 from discord import slash_command, Interaction, Option, Bot
 from discord.ext import commands
 
-from clan_event.inventory_types.item_type import Item, EnumItemTypes
+from clan_event.model.inventory_types.item_type import EnumItemTypes, Item
 from cogs.base import BaseCog
 from config import PREFIX, ClANS_GUILD_ID
-from embeds.boss_event.battle_embed import BattleView
-from embeds.boss_event.boss_drop_embed import BossDropView
-from embeds.boss_event.heal_embed import HealView
-from embeds.boss_event.inventory_embed import HeroInventoryView
+from embeds.boss_event.boss_drop_embed import BossDropEmbed
+from embeds.boss_event.heal_embed import HealEmbed
+from embeds.boss_event.inventory_embed import HeroInventoryEmbed
 from embeds.def_embed import DefaultEmbed
 from systems.boss_event_system.battle_system import battle_system
 from systems.boss_event_system.boss_system import boss_system
@@ -54,7 +53,7 @@ class BossGameAdmin(BaseCog):
     async def heal_me(self, interaction: Interaction):
         hero = hero_system.get_hero_by_user(interaction.user)
         hero.full_regen()
-        await interaction.response.send_message(embed=HealView(hero).embed, ephemeral=True)
+        await interaction.response.send_message(embed=HealEmbed(hero).embed, ephemeral=True)
         hero_system.health_change(hero)
 
     @slash_command(name='take_item', description='Add item to current player inventory', guild_ids=[ClANS_GUILD_ID])
@@ -63,13 +62,13 @@ class BossGameAdmin(BaseCog):
 
         item = items_system.find_by_name(item_name)
         if item is None:
-            await interaction.response.send_message(embed=HeroInventoryView(hero).embed)
+            await interaction.response.send_message(embed=HeroInventoryEmbed(hero).embed)
             return
 
         hero.inventory.add_item(item)
 
         hero_system.modify_inventory(hero)
-        await interaction.response.send_message(embed=HeroInventoryView(hero).embed)
+        await interaction.response.send_message(embed=HeroInventoryEmbed(hero).embed)
 
     @slash_command(name='add_boss_drop', description='add item drop for boss', guild_ids=[ClANS_GUILD_ID])
     async def add_boss_drop(self, interaction: discord.Interaction, boss_name: str, item_name: str):
@@ -82,7 +81,7 @@ class BossGameAdmin(BaseCog):
         inventory.add_item(item)
 
         boss_system.modify_inventory(boss)
-        await interaction.response.send_message(embed=BossDropView(boss).embed)
+        await interaction.response.send_message(embed=BossDropEmbed(boss).embed)
 
     @slash_command(name='remove_boss_drop', description='remove item drop from boss', guild_ids=[ClANS_GUILD_ID])
     async def remove_boss_drop(self, interaction: discord.Interaction, boss_name: str, item_index: int):
@@ -90,12 +89,12 @@ class BossGameAdmin(BaseCog):
         boss.inventory.remove_item(item_index)
 
         boss_system.modify_inventory(boss)
-        await interaction.response.send_message(embed=BossDropView(boss).embed)
+        await interaction.response.send_message(embed=BossDropEmbed(boss).embed)
 
     @slash_command(name='see_boss_inventory', description='show boss inventory', guild_ids=[ClANS_GUILD_ID])
     async def see_boss_inventory(self, interaction: discord.Interaction, boss_name: str):
         boss = boss_system.get_by_name(boss_name)
-        await interaction.response.send_message(embed=BossDropView(boss).embed)
+        await interaction.response.send_message(embed=BossDropEmbed(boss).embed)
 
 
 def setup(bot):

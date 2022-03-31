@@ -1,7 +1,7 @@
 import time
 
-from clan_event.inventory_types.hero_inventory import HeroInventory
-from clan_event.lifeform_types.life_form import LifeForm
+from clan_event.model.inventory_types.hero_inventory import HeroInventory
+from clan_event.model.lifeform_types.life_form import LifeForm
 from config import HERO_RES_TIME
 
 

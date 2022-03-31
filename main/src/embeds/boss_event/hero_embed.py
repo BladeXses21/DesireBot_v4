@@ -3,11 +3,11 @@ from math import ceil
 
 from discord import Embed, Colour
 
-from clan_event.lifeform_types.hero_type import Hero
-from clan_event.heart_bar.health_bar import HealthBarCreator
+from clan_event.model.lifeform_types.hero_type import Hero
+from clan_event.model.heart_bar.health_bar import HealthBarCreator
 
 
-class HeroStatsView(object):
+class HeroStatsEmbed(object):
     def __init__(self, hero: Hero):
         self._embed = Embed(title=f'{hero.name} stats: ', color=Colour(0x292b2f))
 

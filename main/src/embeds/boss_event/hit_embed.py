@@ -1,10 +1,9 @@
-from clan_event.lifeform_types.enemy_type import Enemy
 from discord import Embed, Colour
 
-from clan_event.lifeform_types.hero_type import Hero
+from clan_event.model.lifeform_types.hero_type import Hero
 
 
-class HitView:
+class HitEmbed:
     def __init__(self, hero: Hero):
         self._embed = Embed(title=f'***```{hero.name} hit boss with {hero.attack_dmg} damage```***',
                             color=Colour(0x292b2f))
