@@ -3,8 +3,8 @@ from math import ceil
 
 from discord import Embed, Colour
 
-from clan_event.model.lifeform_types.hero_type import Hero
-from clan_event.model.heart_bar.health_bar import HealthBarCreator
+from game_event.model.lifeform_types.hero_type import Hero
+from game_event.model.heart_bar.health_bar import HealthBarCreator
 
 
 class HeroStatsEmbed(object):

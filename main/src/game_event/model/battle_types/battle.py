@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 from typing import List
 
-from clan_event.model.battle_types.dmg_record import DmgRecord
-from clan_event.model.lifeform_types.enemy_type import Enemy
-from clan_event.model.lifeform_types.hero_type import Hero
+from game_event.model.battle_types.dmg_record import DmgRecord
+from game_event.model.lifeform_types.enemy_type import Enemy
+from game_event.model.lifeform_types.hero_type import Hero
 from systems.boss_event_system.hero_system import hero_system
 
 

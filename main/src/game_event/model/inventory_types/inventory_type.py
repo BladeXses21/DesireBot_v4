@@ -3,7 +3,7 @@ import json
 from pydantic import BaseModel
 from typing import List
 
-from clan_event.model.inventory_types.item_type import Item
+from game_event.model.inventory_types.item_type import Item
 
 
 class Inventory(BaseModel):

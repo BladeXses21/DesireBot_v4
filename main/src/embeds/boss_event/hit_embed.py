@@ -1,6 +1,6 @@
 from discord import Embed, Colour
 
-from clan_event.model.lifeform_types.hero_type import Hero
+from game_event.model.lifeform_types.hero_type import Hero
 
 
 class HitEmbed:

@@ -1,9 +1,9 @@
 from math import ceil
 
-from clan_event.model.battle_types.battle import Battle
+from game_event.model.battle_types.battle import Battle
 from discord import Embed, Colour, User
 
-from clan_event.model.heart_bar.boss_heath_bar import BossHealthBarCreator
+from game_event.model.heart_bar.boss_heath_bar import BossHealthBarCreator
 from systems.boss_event_system.hero_system import hero_system
 
 

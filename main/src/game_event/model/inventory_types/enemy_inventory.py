@@ -1,6 +1,6 @@
 import random
 
-from clan_event.model.inventory_types.inventory_type import Inventory
+from game_event.model.inventory_types.inventory_type import Inventory
 
 
 class EnemyInventory(Inventory):

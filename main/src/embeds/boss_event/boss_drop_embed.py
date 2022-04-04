@@ -1,4 +1,4 @@
-from clan_event.model.lifeform_types.enemy_type import Enemy
+from game_event.model.lifeform_types.enemy_type import Enemy
 from discord import Embed, Colour
 
 
