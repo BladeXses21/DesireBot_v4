@@ -38,7 +38,6 @@ class GameService:
             await interaction.response.send_message(embed=BattleEmbed(battle, interaction.user.id),
                                                     view=fight_view, ephemeral=True)
         else:
-            print(interaction.message.to_message_reference_dict())
             await interaction.response.edit_message(embed=BattleEmbed(battle, interaction.user.id),
                                                     view=fight_view)
 
@@ -57,10 +56,10 @@ class GameService:
         profile_view = ProfileView(back_callback, inventory_callback)
 
         if interaction.message is None:
-            await interaction.response.send_message(embed=HeroStatsEmbed(hero).embed, view=profile_view, ephemeral=True)
+            await interaction.response.send_message(embed=HeroStatsEmbed(hero), view=profile_view, ephemeral=True)
         else:
             print(interaction.message.to_message_reference_dict())
-            await interaction.response.edit_message(embed=HeroStatsEmbed(hero).embed, view=profile_view)
+            await interaction.response.edit_message(embed=HeroStatsEmbed(hero), view=profile_view)
 
     async def inventory(self, interaction: Interaction, ctx: ApplicationContext = None, index: int = 1):
         if ctx is None:
@@ -89,11 +88,10 @@ class GameService:
         inventory_view = InventoryView(back_callback, up_callback, down_callback, equip_callback, remove_item_callback)
 
         if interaction.message is None:
-            await interaction.response.send_message(embed=HeroInventoryEmbed(hero, index).embed,
+            await interaction.response.send_message(embed=HeroInventoryEmbed(hero, index),
                                                     view=inventory_view, ephemeral=True)
         else:
-            print(interaction.message.to_message_reference_dict())
-            await interaction.response.edit_message(embed=HeroInventoryEmbed(hero, index).embed,
+            await interaction.response.edit_message(embed=HeroInventoryEmbed(hero, index),
                                                     view=inventory_view)
 
     async def attack_enemy(self, interaction: Interaction, ctx: ApplicationContext = None):
@@ -138,9 +136,20 @@ class GameService:
             hero_system.modify_inventory(hero)
 
         if interaction.message is None:
-            await interaction.response.send_message(embed=HeroInventoryEmbed(hero, index).embed, ephemeral=True)
+            await interaction.response.send_message(embed=HeroInventoryEmbed(hero, index), ephemeral=True)
         else:
-            await interaction.response.edit_message(embed=HeroInventoryEmbed(hero, index).embed)
+            await interaction.response.edit_message(embed=HeroInventoryEmbed(hero, index))
 
-    async def remove_item(self, interact, ctx, index):
-        pass
+    async def remove_item(self, interaction: Interaction, ctx: ApplicationContext = None, index: int = 1):
+        if ctx is None:
+            ctx = await self.client.get_application_context(interaction)
+
+        hero = hero_system.get_hero_by_user(ctx.user)
+
+        hero.inventory.remove_item(index)
+        hero_system.modify_inventory(hero)
+
+        if interaction.message is None:
+            await interaction.response.send_message(embed=HeroInventoryEmbed(hero, index), ephemeral=True)
+        else:
+            await interaction.response.edit_message(embed=HeroInventoryEmbed(hero, index))

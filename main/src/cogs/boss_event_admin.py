@@ -71,18 +71,18 @@ class BossGameAdmin(BaseCog):
         hero_system.health_change(hero)
 
     @slash_command(name='take_item', description='Add item to hero inventory', guild_ids=[ClANS_GUILD_ID])
-    async def take_item(self, interaction: discord.Interaction, item_name: str):
+    async def take_item(self, interaction: discord.Interaction, item_name: str, index: int = 1):
         hero = hero_system.get_hero_by_user(interaction.user)
 
         item = items_system.find_by_name(item_name)
         if item is None:
-            await interaction.response.send_message(embed=HeroInventoryEmbed(hero).embed)
+            await interaction.response.send_message(embed=HeroInventoryEmbed(hero, index).embed)
             return
 
         hero.inventory.add_item(item)
 
         hero_system.modify_inventory(hero)
-        await interaction.response.send_message(embed=HeroInventoryEmbed(hero).embed)
+        await interaction.response.send_message(embed=HeroInventoryEmbed(hero, index).embed)
 
     @slash_command(name='add_boss_drop', description='add item drop for boss', guild_ids=[ClANS_GUILD_ID])
     async def add_boss_drop(self, interaction: discord.Interaction, boss_name: str, item_name: str):

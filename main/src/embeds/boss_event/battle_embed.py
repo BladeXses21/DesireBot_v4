@@ -1,7 +1,8 @@
 from math import ceil
 
+from discord import Embed, Colour
+
 from game_event.model.battle_types.battle import Battle
-from discord import Embed, Colour, User
 
 from game_event.model.heart_bar.boss_heath_bar import BossHealthBarCreator
 from game_event.model.lifeform_types.hero_type import Hero
@@ -9,7 +10,6 @@ from systems.boss_event_system.hero_system import hero_system
 
 
 class BattleEmbed(Embed):
-
     def __init__(self, battle: Battle, hero_id: int):
         super().__init__(title='Кланова гра', color=Colour(0x9006d0))
         pool_length = 13
@@ -20,7 +20,7 @@ class BattleEmbed(Embed):
 
         self.description = f"**{enemy.name}**\n\n" \
                            f"{enemy.current_health}/{enemy.max_health}\n" \
-                           f"{health_bar.__str__()}\n\n" \
+                           f"{health_bar}\n\n" \
                            f"**Ти наніс -**  {battle.get_hero_dealt_dmg(hero_id)} ⚔\n"
 
         self.add_field(name='Top 3', value='heroes', inline=True)

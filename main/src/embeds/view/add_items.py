@@ -10,11 +10,11 @@ class AddItemsView(View):
         buttons.up_btn.callback = up_callback
         buttons.down_btn.callback = down_callback
         buttons.add_item_btn.callback = add_callback
-        buttons.detail.callback = detail_callback
+        buttons.detail_btn.callback = detail_callback
         self.add_item(buttons.back_btn)
         self.add_item(buttons.up_btn)
         self.add_item(buttons.down_btn)
-        self.add_item(buttons.detail)
+        self.add_item(buttons.detail_btn)
         self.add_item(buttons.add_item_btn)
 
     @staticmethod
