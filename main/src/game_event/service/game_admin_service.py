@@ -5,7 +5,10 @@ from embeds.boss_event.boss_embed import BossEmbed
 from embeds.boss_event.bosses_embed import BossesEmbed
 from embeds.boss_event.game_items_embed import GameItemsEmbed
 from embeds.def_embed import DefaultEmbed
-from embeds.view.view_builder import view_builder
+from embeds.view.add_items import AddItemsView
+from embeds.view.admin_menu import AdminMenuView
+from embeds.view.boss import BossView
+from embeds.view.bosses import BossesView
 from game_event.model.lifeform_types.enemy_type import Enemy
 from systems.boss_event_system.boss_system import boss_system
 from systems.boss_event_system.items_system import items_system
@@ -15,13 +18,32 @@ class GameAdminService:
     def __init__(self, client):
         self.client = client
 
+    async def admin_menu(self, interaction: Interaction):
+        async def enemies_callback(interact: Interaction):
+            await self.game_enemies(interact)
+
+        async def items_callback(interact: Interaction):
+            await self.game_enemies(interact)
+
+        async def heroes_callback(interact: Interaction):
+            await self.game_enemies(interact)
+
+        bosses_view = AdminMenuView(enemies_callback, items_callback, heroes_callback)
+
+        if interaction.message is None:
+            await interaction.response.send_message(embed=None, view=bosses_view, ephemeral=True)
+        else:
+            await interaction.response.edit_message(embed=None, view=bosses_view)
+
+        # todo admin menu
+
     async def game_enemies(self, interaction: Interaction, index: int = 1):
         bosses = boss_system.all_bosses()
         index = len(bosses) if index < 1 else 1 if index > len(bosses) else index
 
         # todo create admin menu
         async def back_callback(interact: Interaction):
-            await self.game_enemies(interact)
+            await self.admin_menu(interact)
 
         async def up_callback(interact: Interaction):
             await self.game_enemies(interact, index - 1)
@@ -35,8 +57,7 @@ class GameAdminService:
             boss_name = bosses.__getitem__(index - 1).name
             await self.enemy(interact, boss_name)
 
-        bosses_view = view_builder.bosses_view(back_callback, up_callback, down_callback,
-                                               choose_callback)
+        bosses_view = BossesView(back_callback, up_callback, down_callback, choose_callback)
 
         if interaction.message is None:
             await interaction.response.send_message(embed=BossesEmbed(bosses, index).embed,
@@ -61,7 +82,7 @@ class GameAdminService:
         async def delete_callback(interact: Interaction):
             await self.delete_boss(interact, enemy_name)
 
-        boss_view = view_builder.boss_view(back_callback, add_items_callback, delete_callback)
+        boss_view = BossView(back_callback, add_items_callback, delete_callback)
 
         if interaction.message is None:
             await interaction.response.send_message(embed=BossEmbed(boss).embed, view=boss_view, ephemeral=True)
@@ -95,11 +116,9 @@ class GameAdminService:
             await self.add_drop(interact, enemy_name, item_name)
 
         if enemy_name is None:
-            items_view = view_builder.boss_additems_view(back_enemies_callback, up_callback, down_callback,
-                                                         add_callback, back_enemies_callback)
+            items_view = AddItemsView(back_enemies_callback, up_callback, down_callback, add_callback, add_callback)
         else:
-            items_view = view_builder.boss_additems_view(back_callback, up_callback, down_callback,
-                                                         add_callback, back_enemies_callback)
+            items_view = AddItemsView(back_callback, up_callback, down_callback, add_callback, add_callback)
 
         if interaction.message is None:
             await interaction.response.send_message(embed=GameItemsEmbed(items, index).embed, view=items_view,

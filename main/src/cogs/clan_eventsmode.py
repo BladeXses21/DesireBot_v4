@@ -96,9 +96,9 @@ class EventsMode(BaseCog):
     @slash_command(name='event_request', description='Select the event', guild_ids=[ClANS_GUILD_ID], default_permission=True)
     # @commands.cooldown(1, 60, commands.BucketType.member)
     async def event_request(self, interaction: discord.Interaction, event_list: Option(str, 'chose item', choices=EnumEventList.list(), required=True)):
-        button_accept = Button(style=discord.ButtonStyle.secondary, label='Взять ивент', emoji='❕')
-        button_end = Button(style=discord.ButtonStyle.secondary, label='Сдать ивент', emoji='❗')
-        button_decline = Button(style=discord.ButtonStyle.secondary, label='Отказ от ивента', emoji='❌')
+        button_accept = Button(style=ButtonStyle.secondary, label='Взять ивент', emoji='❕')
+        button_end = Button(style=ButtonStyle.secondary, label='Сдать ивент', emoji='❗')
+        button_decline = Button(style=ButtonStyle.secondary, label='Отказ от ивента', emoji='❌')
 
         view = discord.ui.View(timeout=None)
         view.add_item(button_accept)

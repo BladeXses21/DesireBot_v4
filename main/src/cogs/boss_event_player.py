@@ -9,7 +9,6 @@ from embeds.def_embed import DefaultEmbed
 from config import ClANS_GUILD_ID, PREFIX
 from cogs.base import BaseCog
 from embeds.boss_event.hit_embed import HitEmbed
-from embeds.view.view_builder import ViewBuilder, view_builder
 from systems.boss_event_system.battle_system import battle_system
 from systems.boss_event_system.hero_system import hero_system
 

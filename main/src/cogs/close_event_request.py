@@ -58,8 +58,8 @@ class CloseRequest(BaseCog):
                             comment: Option(str, 'Оставить коментарий', required=False)):
         if comment is None:
             comment = 'No comments...'
-        button_accept_request = Button(style=discord.ButtonStyle.secondary, label='Принять вызов', emoji='✔')
-        button_decline_request = Button(style=discord.ButtonStyle.secondary, label='Отклонить вызов', emoji='❌')
+        button_accept_request = Button(style=ButtonStyle.secondary, label='Принять вызов', emoji='✔')
+        button_decline_request = Button(style=ButtonStyle.secondary, label='Отклонить вызов', emoji='❌')
 
         view = discord.ui.View(timeout=None)
         view.add_item(button_accept_request)

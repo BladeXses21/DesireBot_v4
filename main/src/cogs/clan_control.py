@@ -75,8 +75,8 @@ class ClanControl(BaseCog):
     async def check_for_afk(self):
         control_system.remove_time_old_check(server_name='Tenderly')
 
-        button_start = Button(style=discord.ButtonStyle.secondary, label='Взять', emoji='❕')
-        button_finish = Button(style=discord.ButtonStyle.secondary, label='Сдать', emoji='❗')
+        button_start = Button(style=ButtonStyle.secondary, label='Взять', emoji='❕')
+        button_finish = Button(style=ButtonStyle.secondary, label='Сдать', emoji='❗')
         button_url = Button(style=discord.ButtonStyle.url, label='Таблица', url=self.url)
 
         view = discord.ui.View(timeout=None)

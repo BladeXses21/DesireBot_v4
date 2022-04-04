@@ -40,6 +40,10 @@ class BossGameAdmin(BaseCog):
         await interaction.response.send_message(
             embed=DefaultEmbed(description=f'***```Boss {boss.name} was born in hell to destroy the world!```***'))
 
+    @slash_command(name='admin_menu', description='Admin menu', guild_ids=[ClANS_GUILD_ID])
+    async def admin_menu(self, interaction: Interaction):
+        await self.game_admin_service.admin_menu(interaction)
+
     @slash_command(name='enemies', description='Create enemy for game', guild_ids=[ClANS_GUILD_ID])
     async def enemies(self, interaction: Interaction):
         await self.game_admin_service.game_enemies(interaction)
