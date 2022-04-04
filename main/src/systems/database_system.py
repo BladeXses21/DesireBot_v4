@@ -66,3 +66,7 @@ class DatabaseSystem(object):
     @property
     def dmg_stats_collection(self):
         return self.db.dmg_stats_collection
+
+    @property
+    def close_event_collection(self):
+        return self.db.close_event_collention

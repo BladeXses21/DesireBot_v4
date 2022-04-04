@@ -2,6 +2,7 @@ import time
 
 from discord import Embed, Colour
 
+
 class RequestDeclineEmbed(object):
     def __init__(self, clan_name: str, event_name: str, create_request_member, curator):
         self._embed = Embed(

@@ -19,7 +19,7 @@ class ClanSettingsMenu(BaseCog):
     async def on_ready(self):
         self.channel = self.client.get_channel(CLAN_SETTING_CHAT)
 
-        await self.menu_setting()
+        # await self.menu_setting()
 
     async def menu_setting(self):
         button_invite = Button(style=discord.ButtonStyle.green, label='Accept')

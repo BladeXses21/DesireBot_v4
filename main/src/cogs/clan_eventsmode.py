@@ -4,11 +4,12 @@ import discord
 from discord.commands import slash_command, Option
 from discord.ext import commands
 from discord.ui import Button
-from enun_clan_events_list.event_list import EnumEventList
-from embeds.clan_events_mode.request_event_embed import RequestEmbed
-from embeds.clan_events_mode.request_accept import RequestAcceptEmbed
-from embeds.clan_events_mode.request_pass import RequestPassEmbed
-from embeds.clan_events_mode.request_decline import RequestDeclineEmbed
+
+from embeds.clan_events_mode.request_event_embed.request_accept import RequestAcceptEmbed
+from embeds.clan_events_mode.request_event_embed.request_decline import RequestDeclineEmbed
+from embeds.enun_clan_events_list.event_list import EnumEventList
+from embeds.clan_events_mode.request_event_embed.request_event_embed import RequestEmbed
+from embeds.clan_events_mode.request_event_embed.request_pass import RequestPassEmbed
 from cogs.base import BaseCog
 from config import ClANS_GUILD_ID, LOG_CHAT, CLANS_EVENT_CHAT, CLAN_VOICE_CATEGORY_NAME, CLANS_ROLES, CURATOR_ROLE, Razefuin
 from embeds.def_embed import DefaultEmbed
@@ -120,8 +121,7 @@ class EventsMode(BaseCog):
 
             await interaction.response.send_message(
                 embed=DefaultEmbed(
-                    f'***```{interaction.user.name}, запрос на ивент был успешно отправлен;\nПожалуйста дождитесь ответа ивентера.```***'),
-                ephemeral=True)
+                    f'***```{interaction.user.name}, запрос на ивент был успешно отправлен;\nПожалуйста дождитесь ответа ивентера.```***'), ephemeral=True)
 
             async def accept_callback(ctx):
 
@@ -140,11 +140,17 @@ class EventsMode(BaseCog):
                 view.add_item(button_end)
                 view.remove_item(button_accept)
                 view.remove_item(button_decline)
-                await interaction.user.send(embed=DefaultEmbed(f'***```{ctx.user.name}, принял запрос ивента;\nОжидайте в ближайшее время.```***'))
-                await request_msg.edit(
-                    embed=RequestAcceptEmbed(clan_name=clan_name, event_name=event_name, create_request_member=get_member,
-                                             clan_control=ctx.user.name).embed,
-                    view=view)
+                try:
+                    await interaction.user.send(embed=DefaultEmbed(f'***```{ctx.user.name}, принял запрос ивента;\nОжидайте в ближайшее время.```***'))
+                    await request_msg.edit(
+                        embed=RequestAcceptEmbed(clan_name=clan_name, event_name=event_name, create_request_member=get_member,
+                                                 clan_control=ctx.user.name).embed,
+                        view=view)
+                except:
+                    await request_msg.edit(
+                        embed=RequestAcceptEmbed(clan_name=clan_name, event_name=event_name, create_request_member=get_member,
+                                                 clan_control=ctx.user.name).embed,
+                        view=view)
 
             async def decline_callback(ctx):
                 view.remove_item(button_accept)
@@ -156,10 +162,15 @@ class EventsMode(BaseCog):
                 clan_name, event_name, member_create_request = events_system.get_request(message_id=request_msg.id)
                 get_member = ctx.guild.get_member(member_create_request).name
                 events_system.request_delete(request_msg.id)
-                await interaction.user.send(embed=DefaultEmbed(f'***```{ctx.user.name}, отклонил запрос на проведение ивента```***'))
-                await request_msg.edit(
-                    embed=RequestDeclineEmbed(clan_name=clan_name, event_name=event_name, create_request_member=get_member, curator=ctx.user.name).embed,
-                    view=view)
+                try:
+                    await interaction.user.send(embed=DefaultEmbed(f'***```{ctx.user.name}, отклонил запрос на проведение ивента```***'))
+                    await request_msg.edit(
+                        embed=RequestDeclineEmbed(clan_name=clan_name, event_name=event_name, create_request_member=get_member, curator=ctx.user.name).embed,
+                        view=view)
+                except:
+                    await request_msg.edit(
+                        embed=RequestDeclineEmbed(clan_name=clan_name, event_name=event_name, create_request_member=get_member, curator=ctx.user.name).embed,
+                        view=view)
 
             async def pass_callback(ctx):
                 check_request_id = events_system.checks_event_mode_to_work(member_id=ctx.user.id)
