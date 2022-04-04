@@ -3,8 +3,8 @@ from math import ceil
 
 from discord import Embed, Colour
 
-from clan_event.model.lifeform_types.hero_type import Hero
-from clan_event.model.heart_bar.health_bar import HealthBarCreator
+from game_event.model.lifeform_types.hero_type import Hero
+from game_event.model.heart_bar.health_bar import HealthBarCreator
 
 
 class HeroStatsEmbed(object):
@@ -18,6 +18,7 @@ class HeroStatsEmbed(object):
         self._embed.add_field(name=f"{hero.current_health}/{hero.max_health}\n", value=f'{health_pool.__str__()}')
         self._embed.add_field(name='Weapon Power', value=hero.attack_dmg, inline=False)
         if hero.is_dead():
+            self._embed.set_thumbnail(url= 'https://cdn.discordapp.com/attachments/952010583388074044/960522617855549491/unknown.png')
             self._embed.add_field(name='Resurrection after',
                                   value=f"{int((hero.respawn_time - time.time()) / 3600)} hours", inline=False)
 

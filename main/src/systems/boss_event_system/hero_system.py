@@ -4,8 +4,8 @@ from types import SimpleNamespace
 
 from discord import User
 
-from config import NEW_HERO_START_ATTACK, NEW_HERO_START_HEALTH
-from clan_event.model.lifeform_types.hero_type import Hero
+from config import NEW_HERO_START_ATTACK, NEW_HERO_START_HEALTH, HERO_REGEN
+from game_event.model.lifeform_types.hero_type import Hero
 from systems.database_system import DatabaseSystem
 
 
@@ -14,7 +14,7 @@ class HeroSystem(DatabaseSystem):
         hero = Hero(id=user.id, name=user.name, current_health=NEW_HERO_START_HEALTH,
                     max_health=NEW_HERO_START_HEALTH, attack_dmg=NEW_HERO_START_ATTACK)
 
-        self.event_hero_collection.insert_one({
+        self.game_hero_collection.insert_one({
             'id': hero.id,
             'name': hero.name,
             'current_health': self.health_to_time(hero.current_health, hero.max_health),
@@ -26,7 +26,7 @@ class HeroSystem(DatabaseSystem):
         return hero
 
     def get_hero_by_user(self, user: User):
-        hero_data = self.event_hero_collection.find_one({'id': user.id}, {})
+        hero_data = self.game_hero_collection.find_one({'id': user.id}, {})
 
         # if user exist return him
         if hero_data is not None:
@@ -37,7 +37,7 @@ class HeroSystem(DatabaseSystem):
         return new_hero
 
     def get_hero_by_id(self, id: int):
-        hero_data = self.event_hero_collection.find_one({'id': id}, {})
+        hero_data = self.game_hero_collection.find_one({'id': id}, {})
 
         # if user exist return him
         if hero_data is not None:
@@ -48,19 +48,19 @@ class HeroSystem(DatabaseSystem):
         return None
 
     def name_by_id(self, user_id: int) -> str:
-        return self.event_hero_collection.find_one({'id': user_id}, {'name': 1})['name']
+        return self.game_hero_collection.find_one({'id': user_id}, {'name': 1})['name']
 
     def health_change(self, hero: Hero):
-        self.event_hero_collection.update_one({'id': hero.id},
-                                              {"$set": {'current_health': self.health_to_time(hero.current_health
+        self.game_hero_collection.update_one({'id': hero.id},
+                                             {"$set": {'current_health': self.health_to_time(hero.current_health
                                                                                               , hero.max_health),
                                                         'respawn_time': hero.respawn_time}
                                                })
         return True
 
     def modify_inventory(self, hero: Hero):
-        self.event_hero_collection.update_one({'id': hero.id},
-                                              {"$set": {'inventory': hero.inventory.dict()}})
+        self.game_hero_collection.update_one({'id': hero.id},
+                                             {"$set": {'inventory': hero.inventory.dict()}})
         return True
 
     @staticmethod
@@ -70,8 +70,7 @@ class HeroSystem(DatabaseSystem):
 
         if difference <= 0:
             return max_health
-        # todo change (60) by variable that consist time for which will regen one life
-        return max_health - int(difference / 60)
+        return max_health - int(difference / HERO_REGEN)
 
     @staticmethod
     def health_to_time(current_health: int, max_health: int) -> int:
@@ -79,8 +78,7 @@ class HeroSystem(DatabaseSystem):
 
         missing_health = max_health - current_health
 
-        # todo change (60) by variable that consist time for which will regen one life
-        seconds_to_regen = now + (missing_health * 60)
+        seconds_to_regen = now + (missing_health * HERO_REGEN)
 
         return int(seconds_to_regen)
 

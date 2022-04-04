@@ -1,4 +1,4 @@
-from clan_event.model.heart_bar.health_bar import HealthBarCreator
+from game_event.model.heart_bar.health_bar import HealthBarCreator
 
 
 class BossHealthBarCreator(HealthBarCreator):

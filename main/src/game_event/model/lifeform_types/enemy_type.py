@@ -1,5 +1,5 @@
-from clan_event.model.inventory_types.enemy_inventory import EnemyInventory
-from clan_event.model.lifeform_types.life_form import LifeForm
+from game_event.model.inventory_types.enemy_inventory import EnemyInventory
+from game_event.model.lifeform_types.life_form import LifeForm
 
 
 class Enemy(LifeForm):
@@ -12,3 +12,6 @@ class Enemy(LifeForm):
 
         if self.current_health <= 0:
             self.current_health = 0
+
+    def __str__(self):
+        return f'{self.name}| 💜{self.max_health}| 🐾{self.attack_dmg}|'

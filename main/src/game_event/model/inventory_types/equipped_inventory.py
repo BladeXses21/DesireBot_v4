@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from clan_event.model.inventory_types.item_type import Item, EnumItemTypes
+from game_event.model.inventory_types.item_type import Item, EnumItemTypes
 
 
 class EquippedInventory(BaseModel):

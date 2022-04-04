@@ -48,16 +48,16 @@ class DatabaseSystem(object):
         return self.db.clontrol_checks
 
     @property
-    def event_boss_collection(self):
+    def game_boss_collection(self):
         return self.db.boss_collection
 
     @property
-    def event_hero_collection(self):
+    def game_hero_collection(self):
         return self.db.hero_collection
 
     @property
-    def event_battle_collection(self):
-        return self.db.event_battle_collection
+    def game_battle_collection(self):
+        return self.db.battle_collection
 
     @property
     def item_collection(self):
