@@ -21,14 +21,21 @@ class CloseEventSystem(DatabaseSystem):
         })
         return True
 
+    # Принятние запроса ивента ивентером
     def accept_close_request(self, message_request_id: int, member_id_accept_request: int):
         self.close_event_collection.update_one({'message_request_id': message_request_id}, {'$set': {'member_id_accept_request': member_id_accept_request}})
+        self.clan_events_mode_collection.update_one({'member_id': member_id_accept_request}, {'$set': {'works_with_request_id': message_request_id}})
+        self.close_event_collection.update_one({'message_request_id': message_request_id}, {'$set': {'time_accept_request': int(time.time())}})
+        self.clan_events_mode_collection.update_one({'member_id': member_id_accept_request}, {'$set': {'member_check_work': True}})
         return True
 
-    def accept_event_mode(self, message_request_id: int, events_mode_id: int):
-        self.close_event_collection.update_one({'message_request_id': message_request_id}, {'$set': {'events_mode_id': events_mode_id}})
-        self.close_event_collection.update_one({'message_request_id': message_request_id}, {'$set': {'time_accept_request': int(time.time())}})
-        return True
+    def get_time_send_request(self, message_id: int):
+        res = self.close_event_collection.find_one({'message_request_id': message_id})
+
+        if res is None:
+            return ()
+
+        return res['time_send_request']
 
     def delete_close_request(self, message_request_id: int):
         self.close_event_collection.delete_one({'message_request_id': message_request_id})

@@ -13,9 +13,9 @@ class AcceptCloseFromEventMode(object):
         self._embed.add_field(name='Первый Клан:', value=f"***```{clan_name}```***", inline=False)
         self._embed.add_field(name='Второй Клан:', value=f"***```{clan_name_two}```***", inline=False)
         self._embed.add_field(name='Ивент:', value=f"***```{event_name}```***", inline=False)
+        self._embed.add_field(name='Коментарий:', value=f"***```{comment}```***", inline=False)
         self._embed.add_field(name='Пользователь:', value=f'{interaction.user.mention}', inline=False)
         self._embed.add_field(name='Ведущий', value=f"{event_mode}", inline=False)
-        self._embed.add_field(name='Коментарий:', value=f"***```{comment}```***", inline=False)
         self._embed.add_field(name='Время отправки запроса:', value=f'<t:{int(time.time())}>', inline=False)
 
     @property

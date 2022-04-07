@@ -6,7 +6,7 @@ from discord import Embed, Colour
 class AcceptCloseEmbed(object):
     def __init__(self, clan_name_requesting: str, clan_name_accepted: str, event_name: str, member_request, member_accepted, comment: str):
         self._embed = Embed(
-            title=f'Клан {clan_name_accepted}, одобрил приглошеник клана {clan_name_requesting}',
+            title=f'Клан {clan_name_accepted}, одобрил приглошение клана {clan_name_requesting}',
             description='***```Ожидает рассмотрения ивентёром...```***',
             color=Colour(0xd5d5d5),
         )

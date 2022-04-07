@@ -6,7 +6,6 @@ from discord import Colour, Embed, Bot
 from discord.ext import commands
 from discord.utils import get
 from discord.commands import Option, slash_command
-from discord.ui import Button
 
 from cogs.base import BaseCog
 from config import CLANS, CLANS_ROLES, ClANS_GUILD_ID
@@ -14,7 +13,7 @@ from embeds.def_embed import DefaultEmbed
 from embeds.clan_embed.clans_embed import DeleteEmbed, ZamEmbed
 from systems.clans_system import clan_system
 from systems.money_system import money_system
-from embeds.clan_view.clan_view_builder import clan_view_builder
+from embeds.clan_events_mode.clan_view.clan_view_builder import clan_view_builder
 
 
 def is_clan_leader():

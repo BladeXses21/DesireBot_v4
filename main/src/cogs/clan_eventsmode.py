@@ -7,7 +7,7 @@ from discord.ui import Button
 
 from embeds.clan_events_mode.request_event_embed.request_accept import RequestAcceptEmbed
 from embeds.clan_events_mode.request_event_embed.request_decline import RequestDeclineEmbed
-from embeds.enun_clan_events_list.event_list import EnumEventList
+from embeds.clan_events_mode.enun_clan_events_list.event_list import EnumEventList
 from embeds.clan_events_mode.request_event_embed.request_event_embed import RequestEmbed
 from embeds.clan_events_mode.request_event_embed.request_pass import RequestPassEmbed
 from cogs.base import BaseCog
@@ -54,8 +54,8 @@ class EventsMode(BaseCog):
     async def add_event(self, ctx, member: discord.Member):
         if member is None:
             return await ctx.send(embed=DefaultEmbed(f'***```Вы не указали пользователя.```***'))
-        if member is ctx.author:
-            return await ctx.send(embed=DefaultEmbed(f'***```Нельзя использовать на себя.```***'))
+        # if member is ctx.author:
+        #     return await ctx.send(embed=DefaultEmbed(f'***```Нельзя использовать на себя.```***'))
         author = ctx.author.id
 
         match author:
@@ -95,11 +95,10 @@ class EventsMode(BaseCog):
         return await ctx.send(embed=DefaultEmbed(f'{description}'))
 
     @slash_command(name='event_request', description='Select the event', guild_ids=[ClANS_GUILD_ID], default_permission=True)
-    # @commands.cooldown(1, 60, commands.BucketType.member)
     async def event_request(self, interaction: discord.Interaction, event_list: Option(str, 'chose item', choices=EnumEventList.list(), required=True)):
-        button_accept = Button(style=ButtonStyle.secondary, label='Взять ивент', emoji='❕')
-        button_end = Button(style=ButtonStyle.secondary, label='Сдать ивент', emoji='❗')
-        button_decline = Button(style=ButtonStyle.secondary, label='Отказ от ивента', emoji='❌')
+        button_accept = Button(style=discord.ButtonStyle.secondary, label='Взять ивент', emoji='❕')
+        button_end = Button(style=discord.ButtonStyle.secondary, label='Сдать ивент', emoji='❗')
+        button_decline = Button(style=discord.ButtonStyle.secondary, label='Отказ от ивента', emoji='❌')
 
         view = discord.ui.View(timeout=None)
         view.add_item(button_accept)

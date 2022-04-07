@@ -70,3 +70,11 @@ class DatabaseSystem(object):
     @property
     def close_event_collection(self):
         return self.db.close_event_collention
+
+    @property
+    def close_rating_collection(self):
+        return self.db.clan_close_rating_system
+
+    @property
+    def clan_check_collection(self):
+        return self.db.clan_check_collection

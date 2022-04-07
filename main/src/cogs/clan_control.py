@@ -75,8 +75,8 @@ class ClanControl(BaseCog):
     async def check_for_afk(self):
         control_system.remove_time_old_check(server_name='Tenderly')
 
-        button_start = Button(style=ButtonStyle.secondary, label='Взять', emoji='❕')
-        button_finish = Button(style=ButtonStyle.secondary, label='Сдать', emoji='❗')
+        button_start = Button(style=discord.ButtonStyle.secondary, label='Взять', emoji='❕')
+        button_finish = Button(style=discord.ButtonStyle.secondary, label='Сдать', emoji='❗')
         button_url = Button(style=discord.ButtonStyle.url, label='Таблица', url=self.url)
 
         view = discord.ui.View(timeout=None)
@@ -227,8 +227,7 @@ class ClanControl(BaseCog):
         await inter.response.send_message('***```Select clan control:```***', view=view, ephemeral=True)
 
         async def menu_callback(interaction: discord.Interaction):
-            member_id, one, two, three, four, five, six, seven, all_day = control_system.view_checks_for_the_week(
-                drop_down_menu.values[0])
+            member_id, one, two, three, four, five, six, seven, all_day = control_system.view_checks_for_the_week(drop_down_menu.values[0])
             get_member = interaction.guild.get_member(member_id)
             _week_embed = Embed(title='Проверки за неделю',
                                 description=f'**Користувач:**{get_member.mention}')
